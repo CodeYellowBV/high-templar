@@ -1,5 +1,5 @@
 import unittest
-from .testapp import app
+from testapp import app
 
 
 class TestAuth(unittest.TestCase):
