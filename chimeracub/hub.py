@@ -20,7 +20,7 @@ class Hub():
     def add_if_auth(self, ws):
         socket = SocketHandler(self, ws)
 
-        auth = self.adapter.check_auth(ws)
+        auth = self.adapter.check_auth(socket)
         if not auth:
             return False
 

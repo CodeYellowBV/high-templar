@@ -4,16 +4,16 @@ import uuid
 class SocketHandler():
     authenticated = None
     hub = None
+    user_id = None
     ws = None
 
     def __init__(self, hub, ws):
         self.uuid = uuid.uuid4()
         self.hub = hub
-        self.subs = []
         self.ws = ws
 
-    # def check_auth(self, req):
-        
+    def parse_user(self, user_data):
+        self.user_id = user_data['id']
 
     # def subscribe(self, requestId, target, scope=None):
     #     s = Subscription(self, requestId, target, scope)
