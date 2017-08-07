@@ -1,4 +1,3 @@
-from settings import Settings
 from flask import Flask
 import logging
 from flask_sockets import Sockets
@@ -8,16 +7,21 @@ def create_app(settings=None):
     app = Flask(__name__)
 
     if settings:
-        app.config.from_object(Settings)
+        app.config.from_object(settings)
 
     sockets = Sockets(app)
 
-    from chimera.hub import Hub
-    hub = Hub()
+    from .hub import Hub
+    hub = Hub(app)
 
-    @sockets.route('/api/')
+    @sockets.route('/ws/')
     def open_socket(ws):
-        socket = hub.add(ws)
+        auth = hub.add_if_auth(ws)
+        if not auth:
+            # todo manage socket close
+            return
+
+        socket = auth
         while not socket.ws.closed:
             message = socket.ws.receive()
             if message:
@@ -25,3 +29,5 @@ def create_app(settings=None):
                     socket.handle(message)
                 except Exception as e:
                     logging.error(e, exc_info=True)
+
+    return app
