@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 
 import os
-import unittest
 from setuptools import find_packages, setup
 
 # with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
@@ -9,12 +8,6 @@ from setuptools import find_packages, setup
 
 # allow setup.py to be run from any path
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
-
-
-def test_suite():
-    test_loader = unittest.TestLoader()
-    test_suite = test_loader.discover('tests', pattern='test_*.py')
-    return test_suite
 
 
 setup(
@@ -36,5 +29,5 @@ setup(
         'python-dotenv >= 0.6.3',
         'requests >= 2.13.0',
     ],
-    test_suite='setup.test_suite'
+    test_suite='tests',
 )
