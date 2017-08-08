@@ -1,6 +1,7 @@
-from unittest import mock
-# from geventwebsockets import WebSocket, Stream
-# from geventwebsockets.handler import WebSocketHandler
+from collections import deque
+from unittest import mock, TestCase as Case
+from .hub import Hub
+import requests
 
 
 def mock_environ():
@@ -11,11 +12,20 @@ def mock_environ():
     }
 
 
+class TestCase(Case):
+    # Reset the Hub
+    # Otherwise the hub still has the socket of the previous test
+    def tearDown(self):
+        if self.client:
+            self.client.app.hub = Hub(self.client.app)
+
+
 class MockWebSocket:
     closed = False
 
     def __init__(self):
         self.environ = mock_environ()
+        self.incoming_messages = deque()
         self.sent_messages = []
 
     def send(self, message):
@@ -24,6 +34,35 @@ class MockWebSocket:
 
     def close(self):
         self.closed = True
+
+    def mock_incoming_message(self, msg):
+        self.incoming_messages.append(msg)
+
+    # Make it selfclosing
+    # A blocking test receiver doesn't test well
+    def receive(self):
+        if not len(self.incoming_messages):
+            self.close()
+            return
+
+        return self.incoming_messages.popleft()
+
+
+class MockResponse:
+    def __init__(self, json_data={}, status_code=200):
+        self.json_data = json_data
+        self.status_code = status_code
+
+    def json(self):
+        return self.json_data
+
+
+def mock_api(url, **kwargs):
+    return MockResponse({
+            'user': {
+                'id': 1,
+            }
+        }, 200)
 
 
 class Client:
@@ -46,6 +85,12 @@ class Client:
         ws = MockWebSocket()
         route(ws)
 
+        return ws
+
+    def set_mock_api(self, func):
+        self._api_mock.side_effect = func
+
     def _mock_outgoing_requests(self):
-        self._outgoing_requests = mock.patch('requests.get')
+        self._api_mock = mock.MagicMock(side_effect=mock_api)
+        self._outgoing_requests = mock.patch.object(requests, 'get', self._api_mock)
         self._outgoing_requests.start()

@@ -12,11 +12,11 @@ def create_app(settings=None):
     sockets = Sockets(app)
 
     from .hub import Hub
-    hub = Hub(app)
+    app.hub = Hub(app)
 
     @sockets.route('/ws/')
     def open_socket(ws):
-        auth = hub.add_if_auth(ws)
+        auth = app.hub.add_if_auth(ws)
         if not auth:
             # todo manage socket close
             return
