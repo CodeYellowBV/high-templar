@@ -26,3 +26,9 @@ class Hub():
 
         self.sockets.append(socket)
         return socket
+
+    def add_to_room(self, details, room_name):
+        room = self.get_or_create_room(room_name)
+
+    def get_or_create_room(self, room_name):
+        return 'bla'

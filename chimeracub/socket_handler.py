@@ -30,10 +30,35 @@ class SocketHandler():
     def handle(self, message):
         if message == 'ping':
             self.ws.send('pong')
+            return
+
+        m = json.loads(message)
+
+        requestId = m.get('requestId', None)
+
+        if m['type'] not in ['subscribe']:
+            self.send({
+                'requestId': requestId,
+                'code': 'error',
+                'message': 'message-type-not-allowed',
+            })
+
+        room = m.get('room', None)
+        if room not in self.allowed_rooms:
+            self.send({
+                'requestId': requestId,
+                'code': 'error',
+                'message': 'room-not-found',
+            })
+
+        self.hub.add_to_room(m, room)
+        self.send({
+            'requestId': requestId,
+            'code': 'success',
+        })
 
     def send(self, message):
         self.ws.send(json.dumps(message))
-
 
     # def subscribe(self, requestId, target, scope=None):
     #     s = Subscription(self, requestId, target, scope)
