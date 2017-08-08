@@ -1,23 +1,38 @@
 import uuid
+import json
 
 
 class SocketHandler():
-    authenticated = None
+    ws = None
     hub = None
     user_id = None
-    ws = None
+    allowed_rooms = []
+    authenticated = None
 
     def __init__(self, hub, ws):
         self.uuid = uuid.uuid4()
         self.hub = hub
+        self.allowed_rooms = []
         self.ws = ws
 
     def parse_user(self, user_data):
         self.user_id = user_data['id']
 
+    def handle_auth_success(self, data):
+        self.user_id = data['user']['id']
+        self.allowed_rooms = data['allowed_rooms']
+
+        # Rooms are serialized JSON
+        # We don't want to double serialize it
+        rooms = [json.loads(r) for r in self.allowed_rooms]
+        self.send({'allowed_rooms': rooms})
+
     def handle(self, message):
         if message == 'ping':
             self.ws.send('pong')
+
+    def send(self, message):
+        self.ws.send(json.dumps(message))
 
 
     # def subscribe(self, requestId, target, scope=None):

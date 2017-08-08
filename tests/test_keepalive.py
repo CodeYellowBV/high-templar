@@ -11,6 +11,5 @@ class TestKeepalive(TestCase):
         ws.mock_incoming_message('ping')
         self.client.open_connection(ws)
 
-        self.assertEqual(1, len(ws.outgoing_messages))
-        self.assertEqual('pong', ws.outgoing_messages[0])
-
+        self.assertEqual(2, len(ws.outgoing_messages))
+        self.assertEqual('pong', ws.outgoing_messages[1])

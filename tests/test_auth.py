@@ -33,3 +33,9 @@ class TestAuth(TestCase):
 
         hub = self.client.app.hub
         self.assertEqual(0, len(hub.sockets))
+
+    def test_lists_allowed_rooms(self):
+        ws = MockWebSocket()
+        self.client.open_connection(ws)
+
+        self.assertEqual(['{"allowed_rooms": [{"target": "ride"}]}'], ws.outgoing_messages)

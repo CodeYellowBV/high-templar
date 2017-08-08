@@ -61,7 +61,8 @@ def mock_api(url, **kwargs):
     return MockResponse({
             'user': {
                 'id': 1,
-            }
+            },
+            'allowed_rooms': ['{"target": "ride"}'],
         }, 200)
 
 

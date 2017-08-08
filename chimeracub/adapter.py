@@ -23,5 +23,5 @@ class Adapter:
         if res.status_code != 200:
             return False
 
-        socket.parse_user(res.json()['user'])
+        socket.handle_auth_success(res.json())
         return True
