@@ -1,5 +1,4 @@
 import requests
-import json
 
 
 class Adapter:
@@ -24,5 +23,5 @@ class Adapter:
         if res.status_code != 200:
             return False
 
-        socket.parse_user(json.loads(res.content.decode())['user'])
+        socket.parse_user(res.json()['user'])
         return True

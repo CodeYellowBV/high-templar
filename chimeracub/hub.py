@@ -26,6 +26,3 @@ class Hub():
 
         self.sockets.append(socket)
         return socket
-
-    # def remove(self, socket):
-    #     self.sockets.remove(socket)
