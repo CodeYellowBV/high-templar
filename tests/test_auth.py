@@ -1,6 +1,6 @@
 import requests
 from .testapp.app import app, django_app_url, django_app_port
-from chimeracub.test import TestCase, Client, MockResponse
+from chimeracub.test import TestCase, Client, MockResponse, MockWebSocket
 
 
 class TestAuth(TestCase):
@@ -8,16 +8,18 @@ class TestAuth(TestCase):
         self.client = Client(app)
 
     def test_incoming_websocket_calls_bootstrap(self):
-        self.client.open_websocket()
+        ws = MockWebSocket()
+        self.client.open_connection(ws)
         self.assertEqual(1, requests.get.call_count)
 
         external_url = 'http://{}:{}/api/bootstrap/'.format(django_app_url, django_app_port)
         self.assertEqual(external_url, requests.get.call_args_list[0][0][0])
 
     def test_added_to_hub(self):
-        self.client.open_websocket()
-        hub = self.client.app.hub
+        ws = MockWebSocket()
+        self.client.open_connection(ws)
 
+        hub = self.client.app.hub
         self.assertEqual(1, len(hub.sockets))
 
     def test_unauth_not_added_to_hub(self):
@@ -25,7 +27,9 @@ class TestAuth(TestCase):
             return MockResponse({}, 403)
 
         self.client.set_mock_api(not_authenticated)
-        self.client.open_websocket()
-        hub = self.client.app.hub
 
+        ws = MockWebSocket()
+        self.client.open_connection(ws)
+
+        hub = self.client.app.hub
         self.assertEqual(0, len(hub.sockets))

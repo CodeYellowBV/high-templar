@@ -26,11 +26,11 @@ class MockWebSocket:
     def __init__(self):
         self.environ = mock_environ()
         self.incoming_messages = deque()
-        self.sent_messages = []
+        self.outgoing_messages = []
 
     def send(self, message):
         # TODO: maybe test it accepts the same as the OG
-        self.sent_messages.append(message)
+        self.outgoing_messages.append(message)
 
     def close(self):
         self.closed = True
@@ -73,7 +73,7 @@ class Client:
     def __del__(self):
         self._outgoing_requests.stop()
 
-    def open_websocket(self, url='/ws/'):
+    def open_connection(self, ws, url='/ws/'):
         # We need to invoke a websocket route with the given url
         # No idea why we can't match on just the url_map
         # So we bind it to an empty context.
@@ -82,9 +82,7 @@ class Client:
         # Don't really know what the second part in the matched result tuple is
         route = context.match(url)[0]
 
-        ws = MockWebSocket()
         route(ws)
-
         return ws
 
     def set_mock_api(self, func):
