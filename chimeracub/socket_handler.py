@@ -15,6 +15,11 @@ class SocketHandler():
     def parse_user(self, user_data):
         self.user_id = user_data['id']
 
+    def handle(self, message):
+        if message == 'ping':
+            self.ws.send('pong')
+
+
     # def subscribe(self, requestId, target, scope=None):
     #     s = Subscription(self, requestId, target, scope)
     #     self.subs.append(s)

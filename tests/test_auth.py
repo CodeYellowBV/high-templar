@@ -12,5 +12,5 @@ class TestAuth(unittest.TestCase):
         self.client.open_websocket()
         self.assertEqual(1, requests.get.call_count)
 
-        external_url = '{}:{}/api/bootstrap'.format(django_app_url, django_app_port)
-        self.assertEqual(external_url, requests.get.call_args_list[0][0])
+        external_url = 'http://{}:{}/api/bootstrap/'.format(django_app_url, django_app_port)
+        self.assertEqual(external_url, requests.get.call_args_list[0][0][0])

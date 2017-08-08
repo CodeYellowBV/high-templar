@@ -3,13 +3,35 @@ from unittest import mock
 # from geventwebsockets.handler import WebSocketHandler
 
 
+def mock_environ():
+    return {
+        'HTTP_COOKIE': 'sessionid=foo; csrftoken=bar',
+        'HTTP_HOST': 'webapp.test',
+        'HTTP_USER_AGENT': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36',
+    }
+
+
+class MockWebSocket:
+    closed = False
+
+    def __init__(self):
+        self.environ = mock_environ()
+        self.sent_messages = []
+
+    def send(self, message):
+        # TODO: maybe test it accepts the same as the OG
+        self.sent_messages.append(message)
+
+    def close(self):
+        self.closed = True
+
+
 class Client:
     def __init__(self, app):
         self.app = app
         self._mock_outgoing_requests()
 
     def __del__(self):
-        print('Test Client: stopping outgoing request mock')
         self._outgoing_requests.stop()
 
     def open_websocket(self, url='/ws/'):
@@ -21,12 +43,8 @@ class Client:
         # Don't really know what the second part in the matched result tuple is
         route = context.match(url)[0]
 
-        return
-
-        # TODO: create a mock WebSocket
-        # gevent-websocket is hard to hack
-        # wsh = WebSocketHandler()
-        # ws = WebSocket(self.environ, Stream(ws_handler), ws_handler)
+        ws = MockWebSocket()
+        route(ws)
 
     def _mock_outgoing_requests(self):
         self._outgoing_requests = mock.patch('requests.get')
