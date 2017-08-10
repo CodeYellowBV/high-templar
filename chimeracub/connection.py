@@ -6,14 +6,13 @@ class Connection():
     ws = None
     hub = None
     user_id = None
-    allowed_rooms = []
-    authenticated = None
 
     def __init__(self, hub, ws):
-        self.uuid = uuid.uuid4()
-        self.hub = hub
-        self.allowed_rooms = []
         self.ws = ws
+        self.hub = hub
+        self.rooms = []
+        self.allowed_rooms = []
+        self.uuid = uuid.uuid4()
 
     def parse_user(self, user_data):
         self.user_id = user_data['id']
@@ -43,17 +42,21 @@ class Connection():
                 'message': 'message-type-not-allowed',
             })
 
+        return self.handle_subscribe(m)
+
+    def handle_subscribe(self, m):
         room = m.get('room', None)
         if room not in self.allowed_rooms:
             self.send({
-                'requestId': requestId,
+                'requestId': m['requestId'],
                 'code': 'error',
                 'message': 'room-not-found',
             })
 
-        self.hub.add_to_room(m, room)
+        room = self.hub.add_to_room(self, m, room)
+        self.rooms.append(room)
         self.send({
-            'requestId': requestId,
+            'requestId': m['requestId'],
             'code': 'success',
         })
 

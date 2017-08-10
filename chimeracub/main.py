@@ -18,15 +18,15 @@ def create_app(settings=None):
     def open_socket(ws):
         auth = app.hub.add_if_auth(ws)
         if not auth:
-            # todo manage socket close
+            # todo manage connection close
             return
 
-        socket = auth
-        while not socket.ws.closed:
-            message = socket.ws.receive()
+        connection = auth
+        while not connection.ws.closed:
+            message = connection.ws.receive()
             if message:
                 try:
-                    socket.handle(message)
+                    connection.handle(message)
                 except Exception as e:
                     logging.error(e, exc_info=True)
 

@@ -28,13 +28,52 @@ class Adapter:
         return True
 
 
+class Room:
+    '''
+    A collection of subscriptions which have access to a scoped permission.
+
+    A permission would be: See actions
+    A scoped permission would be: See your own actions
+
+    Then there would "exist" a room for every single user with view_action.own scoped permission
+    "exist" between quotation marks, because chimera only creates a room when someone actually subscribes to it.
+
+    A room keeps track of all connections with the same scoped permission.
+    In the case a view_action.own, it would have a maximum of 1 connection.
+    '''
+
+    def __init__(self, name):
+        self.name = name
+        self.subscriptions = []
+
+    def subscribe(self, connection, request):
+        sub = Subscription(connection, request)
+        self.subscriptions.append(sub)
+
+    @property
+    def connections(self):
+        return [s.connection for s in self.subscriptions]
+
+
+class Subscription:
+    '''
+    A subscription of a connection to a room
+    '''
+
+    def __init__(self, connection, request):
+        self.connection = connection
+        self.requestId = request['requestId']
+        self.scope = request.get('scope', {})
+
+
 class Hub:
     '''
-    Class which manages all connections.
+    Manages all connections.
     '''
 
     def __init__(self, app):
         self.app = app
+        self.rooms = {}
         self.connections = []
         self.adapter = Adapter(app)
 
@@ -53,8 +92,15 @@ class Hub:
         self.connections.append(connection)
         return connection
 
-    def add_to_room(self, details, room_name):
-        room = self.get_or_create_room(room_name)
-
     def get_or_create_room(self, room_name):
-        return 'bla'
+        if room_name in self.rooms:
+            return self.rooms[room_name]
+
+        room = Room(room_name)
+        self.rooms[room_name] = room
+        return room
+
+    def add_to_room(self, connection, request, room_name):
+        room = self.get_or_create_room(room_name)
+        room.subscribe(connection, request)
+        return room
