@@ -43,21 +43,26 @@ class MockWebSocket:
 
     def resume_tests(self):
         g_self = greenlet.getcurrent()
-        g_self.parent.switch()
+
+        # Switch to the main thread if we are using greenlets.
+        # Otherwise just close to jump out of the ws.receive loop
+        if g_self.parent:
+            g_self.parent.switch()
+        else:
+            self.close()
 
     def receive_message(self, msg):
         return msg
 
     def receive(self):
-        if not len(self.pending_actions) and not self.closed:
-            self.close()
-            return
-
         result = None
         # Concurrency loop
         # This stack can contain a greenlet switch (method)
         # Or a message receive (str)
         while not result:
+            if not len(self.pending_actions):
+                self.resume_tests()
+                return
             next_action = self.pending_actions.popleft()
 
             if callable(next_action):
@@ -77,12 +82,16 @@ class MockResponse:
         return self.json_data
 
 
+room_ride = '{"target": "ride"}'
+room_car = '{"target": "car"}'
+
+
 def mock_api(url, **kwargs):
     return MockResponse({
             'user': {
                 'id': 1,
             },
-            'allowed_rooms': ['{"target": "ride"}'],
+            'allowed_rooms': [room_ride, room_car],
         }, 200)
 
 
