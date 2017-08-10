@@ -1,6 +1,7 @@
 from collections import deque
 from unittest import mock, TestCase as Case
 from .hub import Hub
+from greenlet import greenlet
 import requests
 
 
@@ -22,10 +23,11 @@ class TestCase(Case):
 
 class MockWebSocket:
     closed = False
+    connection = None
 
     def __init__(self):
         self.environ = mock_environ()
-        self.incoming_messages = deque()
+        self.pending_actions = deque()
         self.outgoing_messages = []
 
     def send(self, message):
@@ -33,19 +35,37 @@ class MockWebSocket:
         self.outgoing_messages.append(message)
 
     def close(self):
+        self.connection.unsubscribe_all()
         self.closed = True
 
     def mock_incoming_message(self, msg):
-        self.incoming_messages.append(msg)
+        self.pending_actions.append(self.receive_message(msg))
 
-    # Make it selfclosing
-    # A blocking test receiver doesn't test well
+    def resume_tests(self):
+        g_self = greenlet.getcurrent()
+        g_self.parent.switch()
+
+    def receive_message(self, msg):
+        return msg
+
     def receive(self):
-        if not len(self.incoming_messages):
+        if not len(self.pending_actions) and not self.closed:
             self.close()
             return
 
-        return self.incoming_messages.popleft()
+        result = None
+        # Concurrency loop
+        # This stack can contain a greenlet switch (method)
+        # Or a message receive (str)
+        while not result:
+            next_action = self.pending_actions.popleft()
+
+            if callable(next_action):
+                next_action()
+            else:
+                result = next_action
+
+        return result
 
 
 class MockResponse:
@@ -84,7 +104,6 @@ class Client:
         route = context.match(url)[0]
 
         route(ws)
-        return ws
 
     def set_mock_api(self, func):
         self._api_mock.side_effect = func

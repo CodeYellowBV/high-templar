@@ -23,6 +23,7 @@ setup(
     classifiers=[],
     install_requires=[
         'gevent >= 1.1.2',
+        'greenlet >= 0.4.12',
         'Flask >= 0.12.0',
         'Flask-Script >= 2.0.5',
         'Flask-Sockets >= 0.2.1',

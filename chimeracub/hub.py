@@ -42,13 +42,30 @@ class Room:
     In the case a view_action.own, it would have a maximum of 1 connection.
     '''
 
-    def __init__(self, name):
+    def __init__(self, name, hub):
         self.name = name
+        self.hub = hub
         self.subscriptions = []
 
     def subscribe(self, connection, request):
         sub = Subscription(connection, request)
         self.subscriptions.append(sub)
+
+    # Don't just unsubscribe: remove all subscriptions for a connection
+    def remove_connection(self, connection):
+        # Clone self.subscriptions because they may be removed when closed
+        for s in list(self.subscriptions):
+            if s.connection == connection:
+                self.subscriptions.remove(s)
+
+        self.close_if_empty()
+
+    def close_if_empty(self):
+        if not self.subscriptions:
+            self.close()
+
+    def close(self):
+        self.hub.close_room(self)
 
     @property
     def connections(self):
@@ -96,7 +113,7 @@ class Hub:
         if room_name in self.rooms:
             return self.rooms[room_name]
 
-        room = Room(room_name)
+        room = Room(room_name, self)
         self.rooms[room_name] = room
         return room
 
@@ -104,3 +121,10 @@ class Hub:
         room = self.get_or_create_room(room_name)
         room.subscribe(connection, request)
         return room
+
+    def close_room(self, room):
+        # Clone self.rooms because they may be removed when closed
+        rooms = self.rooms.copy()
+        for r_name, r in rooms.items():
+            if r == room:
+                del self.rooms[r_name]

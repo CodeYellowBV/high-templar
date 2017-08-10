@@ -13,6 +13,7 @@ class Connection():
         self.rooms = []
         self.allowed_rooms = []
         self.uuid = uuid.uuid4()
+        ws.connection = self
 
     def parse_user(self, user_data):
         self.user_id = user_data['id']
@@ -59,6 +60,10 @@ class Connection():
             'requestId': m['requestId'],
             'code': 'success',
         })
+
+    def unsubscribe_all(self):
+        for room in self.rooms:
+            room.remove_connection(self)
 
     def send(self, message):
         self.ws.send(json.dumps(message))
