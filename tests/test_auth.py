@@ -20,7 +20,7 @@ class TestAuth(TestCase):
         self.client.open_connection(ws)
 
         hub = self.client.app.hub
-        self.assertEqual(1, len(hub.sockets))
+        self.assertEqual(1, len(hub.connections))
 
     def test_unauth_not_added_to_hub(self):
         def not_authenticated(request, **kwargs):
@@ -32,7 +32,7 @@ class TestAuth(TestCase):
         self.client.open_connection(ws)
 
         hub = self.client.app.hub
-        self.assertEqual(0, len(hub.sockets))
+        self.assertEqual(0, len(hub.connections))
 
     def test_lists_allowed_rooms(self):
         ws = MockWebSocket()

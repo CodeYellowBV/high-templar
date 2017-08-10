@@ -2,7 +2,7 @@ import uuid
 import json
 
 
-class SocketHandler():
+class Connection():
     ws = None
     hub = None
     user_id = None
