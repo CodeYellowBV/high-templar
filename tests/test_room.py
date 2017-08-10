@@ -100,8 +100,7 @@ class TestRoom(TestCase):
         self.assertSetEqual(set([ws1.connection, ws2.connection]), set(hub.rooms[room_ride].connections))
 
         # Close the second websocket, unsubscribing if for all the rooms
-        ws2.pending_actions.append(ws2.close)
-        g2.switch()
+        ws2.close()
 
         # Test that the now empty room_car is closed
         self.assertEqual([room_ride], list(hub.rooms.keys()))
