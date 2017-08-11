@@ -13,7 +13,12 @@ class Connection():
         self.rooms = []
         self.allowed_rooms = []
         self.uuid = uuid.uuid4()
-        ws.connection = self
+
+        # Nasty hack
+        try:
+            ws.connection = self
+        except AttributeError:
+            pass
 
     def parse_user(self, user_data):
         self.user_id = user_data['id']
