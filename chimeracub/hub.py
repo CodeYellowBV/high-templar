@@ -1,4 +1,6 @@
+import json
 import requests
+from flask import make_response
 from .connection import Connection
 
 
@@ -67,6 +69,12 @@ class Room:
     def close(self):
         self.hub.close_room(self)
 
+    def publish(self, data):
+        for s in self.subscriptions:
+            s.publish(data)
+
+        return len(self.subscriptions)
+
     @property
     def connections(self):
         return [s.connection for s in self.subscriptions]
@@ -82,6 +90,13 @@ class Subscription:
         self.requestId = request['requestId']
         self.scope = request.get('scope', {})
 
+    def publish(self, data):
+        self.connection.ws.send(json.dumps({
+            'requestId': self.requestId,
+            'type': 'publish',
+            'data': data,
+        }))
+
 
 class Hub:
     '''
@@ -94,10 +109,19 @@ class Hub:
         self.connections = []
         self.adapter = Adapter(app)
 
-    # def handle_event(self, target, _type, item, snapshot):
-    #     # Clone self.connections because they may be removed when closed
-    #     for socket in list(self.connections):
-    #         socket.handle_event(target, _type, item, snapshot)
+    def handle_trigger(self, body):
+        if 'rooms' not in body:
+            return make_response('rooms not specified', 400)
+        if 'data' not in body:
+            return make_response('data not specified', 400)
+
+        pub_count = 0
+        for r in body['rooms']:
+            if r not in self.rooms:
+                continue
+            pub_count += self.rooms[r].publish(body['data'])
+
+        return make_response('published to {} subscriptions'.format(pub_count))
 
     def add_if_auth(self, ws):
         connection = Connection(self, ws)

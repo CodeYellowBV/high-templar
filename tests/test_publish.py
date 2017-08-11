@@ -42,7 +42,7 @@ class TestPublish(TestCase):
 
         # Mock incoming ride trigger
         self.client.flask_test_client.post(
-            '/trigger',
+            '/trigger/',
             content_type='application/json',
             data=json.dumps({
                 'rooms': [room_ride],
@@ -57,19 +57,20 @@ class TestPublish(TestCase):
         # The third is the actual publish
         self.assertEqual(3, len(ws1.outgoing_messages))
         self.assertEqual(json.dumps(publish_ride), ws1.outgoing_messages[2])
-        self.assertEqual(3, len(ws2.outgoing_messages))
-        self.assertEqual(json.dumps(publish_ride), ws2.outgoing_messages[2])
+        # ws2 has 2 subscribe success events
+        self.assertEqual(4, len(ws2.outgoing_messages))
+        self.assertEqual(json.dumps(publish_ride), ws2.outgoing_messages[3])
 
         ws2.close()
 
         self.client.flask_test_client.post(
-            '/trigger',
+            '/trigger/',
             content_type='application/json',
             data=json.dumps({
                 'rooms': [room_ride],
                 'data': [{
                     'id': 1,
-                    'driver': 3,
+                    'driver': 2,
                 }]
             }))
 

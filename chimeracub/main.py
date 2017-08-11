@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request
 import logging
 from flask_sockets import Sockets
 
@@ -29,5 +29,10 @@ def create_app(settings=None):
                     connection.handle(message)
                 except Exception as e:
                     logging.error(e, exc_info=True)
+
+    @app.route('/trigger/', methods=['POST'])
+    def handle_trigger():
+        data = request.get_json()
+        return app.hub.handle_trigger(data)
 
     return app
