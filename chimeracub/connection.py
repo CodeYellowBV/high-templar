@@ -66,6 +66,9 @@ class Connection():
             room.remove_connection(self)
 
     def send(self, message):
+        if self.ws.closed:
+            return
+
         self.ws.send(json.dumps(message))
 
     # def subscribe(self, requestId, target, scope=None):
