@@ -18,7 +18,6 @@ publish_ride = {
     'type': 'publish',
     'data': [{
         'id': 1,
-        'driver': 2,
     }]
 }
 
@@ -47,7 +46,6 @@ class TestPublish(TestCase):
                 'rooms': [room_ride],
                 'data': [{
                     'id': 1,
-                    'driver': 2,
                 }]
             }))
 
@@ -69,7 +67,6 @@ class TestPublish(TestCase):
                 'rooms': [room_ride],
                 'data': [{
                     'id': 1,
-                    'driver': 2,
                 }]
             }))
 
@@ -102,7 +99,6 @@ class TestPublish(TestCase):
                 'rooms': [room_ride],
                 'data': [{
                     'id': 1,
-                    'driver': 2,
                 }]
             }))
 

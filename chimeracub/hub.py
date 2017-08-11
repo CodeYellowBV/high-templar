@@ -4,6 +4,10 @@ from flask import make_response
 from .connection import Connection
 
 
+class WebSocketClosedError(Exception):
+    pass
+
+
 class Adapter:
     '''
     Translates incoming requests from the django app to hub actions
@@ -69,11 +73,16 @@ class Room:
     def close(self):
         self.hub.close_room(self)
 
+    # Returns a list of closed connections
     def publish(self, data):
+        closed_connections = []
         for s in self.subscriptions:
-            s.publish(data)
+            try:
+                s.publish(data)
+            except WebSocketClosedError:
+                closed_connections.append(s.connection)
 
-        return len(self.subscriptions)
+        return closed_connections
 
     @property
     def connections(self):
@@ -91,6 +100,9 @@ class Subscription:
         self.scope = request.get('scope', {})
 
     def publish(self, data):
+        if self.connection.ws.closed:
+            raise WebSocketClosedError
+
         self.connection.ws.send(json.dumps({
             'requestId': self.requestId,
             'type': 'publish',
@@ -115,13 +127,18 @@ class Hub:
         if 'data' not in body:
             return make_response('data not specified', 400)
 
-        pub_count = 0
+        closed_connections = []
         for r in body['rooms']:
             if r not in self.rooms:
                 continue
-            pub_count += self.rooms[r].publish(body['data'])
+            connections = self.rooms[r].publish(body['data'])
+            closed_connections.extend(connections)
 
-        return make_response('published to {} subscriptions'.format(pub_count))
+        for r_name, room in self.rooms.copy().items():
+            for c in closed_connections:
+                room.remove_connection(c)
+
+        return make_response('publish success')
 
     def add_if_auth(self, ws):
         connection = Connection(self, ws)
