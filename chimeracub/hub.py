@@ -118,7 +118,6 @@ class Hub:
     def __init__(self, app):
         self.app = app
         self.rooms = {}
-        self.connections = []
         self.adapter = Adapter(app)
 
     def handle_trigger(self, body):
@@ -145,9 +144,9 @@ class Hub:
 
         auth = self.adapter.check_auth(connection)
         if not auth:
+            ws.close()
             return False
 
-        self.connections.append(connection)
         return connection
 
     def get_or_create_room(self, room_name):

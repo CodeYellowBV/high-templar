@@ -15,14 +15,7 @@ class TestAuth(TestCase):
         external_url = 'http://{}:{}/api/bootstrap/'.format(django_app_url, django_app_port)
         self.assertEqual(external_url, requests.get.call_args_list[0][0][0])
 
-    def test_added_to_hub(self):
-        ws = MockWebSocket()
-        self.client.open_connection(ws)
-
-        hub = self.client.app.hub
-        self.assertEqual(1, len(hub.connections))
-
-    def test_unauth_not_added_to_hub(self):
+    def test_unauth_closed(self):
         def not_authenticated(request, **kwargs):
             return MockResponse({}, 403)
 
@@ -31,8 +24,7 @@ class TestAuth(TestCase):
         ws = MockWebSocket()
         self.client.open_connection(ws)
 
-        hub = self.client.app.hub
-        self.assertEqual(0, len(hub.connections))
+        self.assertEqual(True, ws.closed)
 
     def test_lists_allowed_rooms(self):
         ws = MockWebSocket()
