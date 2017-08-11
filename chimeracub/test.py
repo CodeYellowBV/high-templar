@@ -1,5 +1,7 @@
 from collections import deque
 from unittest import mock, TestCase as Case
+from geventwebsocket.exceptions import WebSocketError
+from geventwebsocket.websocket import MSG_ALREADY_CLOSED
 from .hub import Hub
 from greenlet import greenlet
 import requests
@@ -31,7 +33,9 @@ class MockWebSocket:
         self.outgoing_messages = []
 
     def send(self, message):
-        # TODO: maybe test it accepts the same as the OG
+        if self.closed:
+            raise WebSocketError(MSG_ALREADY_CLOSED)
+
         self.outgoing_messages.append(message)
 
     def close(self):

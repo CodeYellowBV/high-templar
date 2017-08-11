@@ -71,7 +71,6 @@ class TestRoom(TestCase):
 
         hub = self.client.app.hub
 
-        # ws.pending_actions.append(ws.resume_tests)
         g1 = greenlet(self.client.open_connection)
         g1.switch(ws)
 
