@@ -11,7 +11,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 
 setup(
-    name='chimera-cub',
+    name='high_templar',
     version='0.0.1',
     packages=find_packages(),
     include_package_data=True,
@@ -19,7 +19,7 @@ setup(
     description='A server which handles websockets for an existing django-binder instance',
     author='Jasper Stam',
     author_email='jasper@codeyellow.nl',
-    url='https://github.com/CodeYellowBV/chimera-cub',
+    url='https://github.com/CodeYellowBV/high-templar',
     classifiers=[],
     install_requires=[
         'gevent >= 1.1.2',

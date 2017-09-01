@@ -42,7 +42,7 @@ class Room:
     A scoped permission would be: See your own actions
 
     Then there would "exist" a room for every single user with view_action.own scoped permission
-    "exist" between quotation marks, because chimera only creates a room when someone actually subscribes to it.
+    "exist" between quotation marks, because high-templar only creates a room when someone actually subscribes to it.
 
     A room keeps track of all connections with the same scoped permission.
     In the case a view_action.own, it would have a maximum of 1 connection.

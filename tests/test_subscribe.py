@@ -1,6 +1,6 @@
 import json
 from .testapp.app import app
-from chimeracub.test import TestCase, Client, MockWebSocket, room_ride, room_car
+from high_templar.test import TestCase, Client, MockWebSocket, room_ride, room_car
 
 subscribe_ride = {
     'requestId': 'a',

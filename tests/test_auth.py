@@ -1,6 +1,6 @@
 import requests
 from .testapp.app import app, django_app_url, django_app_port
-from chimeracub.test import TestCase, Client, MockResponse, MockWebSocket
+from high_templar.test import TestCase, Client, MockResponse, MockWebSocket
 
 
 class TestAuth(TestCase):

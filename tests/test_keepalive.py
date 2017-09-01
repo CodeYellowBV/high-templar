@@ -1,5 +1,5 @@
 from .testapp.app import app
-from chimeracub.test import TestCase, Client, MockWebSocket
+from high_templar.test import TestCase, Client, MockWebSocket
 
 
 class TestKeepalive(TestCase):
