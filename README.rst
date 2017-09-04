@@ -37,7 +37,6 @@ Origin
 This repository is based on archon_. Archon is a framework for creating full fledged websocket based CRUD APIs. High-templar is only half the framework of Archon, as it relies on an existing API and only provides pubsub.
 
 
-
 .. |architecture| image:: architecture.png
 .. _archon: https://github.com/JasperStam/archon
 .. |build_status| image:: https://travis-ci.org/CodeYellowBV/high-templar.svg?branch=master
