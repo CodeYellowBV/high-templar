@@ -1,0 +1,14 @@
+sudo: false
+language: python
+python:
+  - "3.4"
+  - "3.5"
+cache:
+  pip: true
+install:
+  - ./setup.py install
+  - pip install codecov coverage
+script:
+  - coverage run --source="high_templar" setup.py test
+after_success:
+  - codecov

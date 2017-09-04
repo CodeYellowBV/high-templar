@@ -1,6 +1,8 @@
 high-templar
 ====================
 
+|build_status|_ |code_coverage|_
+
 A python framework for creating a stateful server which handles websocket functionality for an existing HTTP only API.
 
 Flow
@@ -38,3 +40,7 @@ This repository is based on archon_. Archon is a framework for creating full fle
 
 .. |architecture| image:: architecture.png
 .. _archon: https://github.com/JasperStam/archon
+.. |build_status| image:: https://travis-ci.org/CodeYellowBV/high-templar.svg?branch=master
+.. _build_status: https://travis-ci.org/CodeYellowBV/high-templar
+.. |code_coverage| image:: https://codecov.io/gh/CodeYellowBV/high-templar/branch/master/graph/badge.svg
+.. _code_coverage: https://codecov.io/gh/CodeYellowBV/high-templar
