@@ -17,7 +17,7 @@ Flow
 |architecture|
 
 Installation
------------
+------------
 
 .. code:: bash
 
