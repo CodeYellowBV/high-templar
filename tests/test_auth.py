@@ -30,4 +30,4 @@ class TestAuth(TestCase):
         ws = MockWebSocket()
         self.client.open_connection(ws)
 
-        self.assertEqual(['{"allowed_rooms": [{"target": "ride"}, {"target": "car"}]}'], ws.outgoing_messages)
+        self.assertEqual(['{"allowed_rooms": ["{\\"target\\": \\"ride\\"}", "{\\"target\\": \\"car\\"}"]}'], ws.outgoing_messages)

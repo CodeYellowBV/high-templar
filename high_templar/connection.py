@@ -27,10 +27,7 @@ class Connection():
         self.user_id = data['user']['id']
         self.allowed_rooms = data['allowed_rooms']
 
-        # Rooms are serialized JSON
-        # We don't want to double serialize it
-        rooms = [json.loads(r) for r in self.allowed_rooms]
-        self.send({'allowed_rooms': rooms})
+        self.send({'allowed_rooms': self.allowed_rooms})
 
     def handle(self, message):
         if message == 'ping':
