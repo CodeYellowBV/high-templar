@@ -1,6 +1,7 @@
+from flask_sockets import Sockets
 from flask import Flask, request
 import logging
-from flask_sockets import Sockets
+import json
 
 
 def create_app(settings=None):
@@ -32,7 +33,7 @@ def create_app(settings=None):
 
     @app.route('/trigger/', methods=['POST'])
     def handle_trigger():
-        data = request.get_json()
+        data = json.loads(request.data.decode())
         return app.hub.handle_trigger(data)
 
     return app
