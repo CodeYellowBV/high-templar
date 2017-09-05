@@ -80,8 +80,6 @@ class TestPublish(TestCase):
         ws2.mock_incoming_message(json.dumps(subscribe_ride))
         ws2.mock_incoming_message(json.dumps(subscribe_car))
 
-        hub = self.client.app.hub
-
         g1 = greenlet(self.client.open_connection)
         g1.switch(ws1)
 
@@ -110,5 +108,6 @@ class TestPublish(TestCase):
 
         # Make sure the closed websocket has its connection
         # removed from the rooms
-        self.assertEqual([room_ride], list(hub.rooms.keys()))
-        self.assertEqual([ws1.connection], hub.rooms[room_ride].connections)
+        self.assertHubRoomsEqual([room_ride])
+        r_ride = self.getHubRoomByDict(room_ride)
+        self.assertEqual([ws1.connection], r_ride.connections)

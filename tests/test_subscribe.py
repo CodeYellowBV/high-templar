@@ -10,7 +10,7 @@ subscribe_ride = {
 subscribe_weird = {
     'requestId': 'b',
     'type': 'subscribe',
-    'room': 'weird',
+    'room': {'foo': 'bar'},
 }
 
 

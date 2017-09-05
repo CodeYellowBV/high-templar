@@ -3,6 +3,7 @@ from unittest import mock, TestCase as Case
 from geventwebsocket.exceptions import WebSocketError
 from geventwebsocket.websocket import MSG_ALREADY_CLOSED
 from .hub import Hub
+from .room import Room
 from greenlet import greenlet
 import requests
 
@@ -21,6 +22,19 @@ class TestCase(Case):
     def tearDown(self):
         if self.client:
             self.client.app.hub = Hub(self.client.app)
+
+    # Shorthand for hashing rooms
+    # Converting to sets etc.
+    def assertHubRoomsEqual(self, room_dicts):
+        hub = self.client.app.hub
+
+        room_hashes = [Room.hash_dict(r) for r in room_dicts]
+        return self.assertSetEqual(set(room_hashes), set(hub.rooms.keys()))
+
+    def getHubRoomByDict(self, room_dict):
+        hub = self.client.app.hub
+        room_hash = Room.hash_dict(room_dict)
+        return hub.rooms[room_hash]
 
 
 class MockWebSocket:
@@ -86,8 +100,8 @@ class MockResponse:
         return self.json_data
 
 
-room_ride = '{"target": "ride"}'
-room_car = '{"target": "car"}'
+room_ride = {'target': 'ride'}
+room_car = {'target': 'car'}
 
 
 def mock_api(url, **kwargs):

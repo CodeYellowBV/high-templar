@@ -1,5 +1,6 @@
 import uuid
 import json
+from .room import Room
 
 
 class Connection():
@@ -27,7 +28,7 @@ class Connection():
         self.user_id = data['user']['id']
         self.allowed_rooms = data['allowed_rooms']
 
-        self.send({'allowed_rooms': self.allowed_rooms})
+        self.send({'allowed_rooms': [Room.hash_dict(r) for r in self.allowed_rooms]})
 
     def handle(self, message):
         if message == 'ping':
@@ -47,16 +48,21 @@ class Connection():
 
         return self.handle_subscribe(m)
 
+    def is_room_allowed(self, room_hash):
+        return room_hash in [Room.hash_dict(ar) for ar in self.allowed_rooms]
+
     def handle_subscribe(self, m):
-        room = m.get('room', None)
-        if room not in self.allowed_rooms:
+        room_dict = m.get('room', None)
+        room_hash = Room.hash_dict(room_dict)
+
+        if not self.is_room_allowed(room_hash):
             self.send({
                 'requestId': m['requestId'],
                 'code': 'error',
                 'message': 'room-not-found',
             })
 
-        room = self.hub.add_to_room(self, m, room)
+        room = self.hub.add_to_room(self, m, room_hash)
         self.rooms.append(room)
         self.send({
             'requestId': m['requestId'],
