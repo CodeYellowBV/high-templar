@@ -101,7 +101,8 @@ class MockResponse:
 
 
 room_ride = {'target': 'ride'}
-room_car = {'target': 'car'}
+room_car = {'target': 'car', 'ride': 1}
+room_car_reverse = {'ride': 1, 'target': 'car'}
 
 
 def mock_api(url, **kwargs):

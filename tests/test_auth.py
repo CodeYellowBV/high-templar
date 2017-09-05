@@ -1,6 +1,7 @@
 import requests
+import json
 from .testapp.app import app, django_app_url, django_app_port
-from high_templar.test import TestCase, Client, MockResponse, MockWebSocket
+from high_templar.test import TestCase, Client, MockResponse, MockWebSocket, room_ride, room_car
 
 
 class TestAuth(TestCase):
@@ -30,4 +31,5 @@ class TestAuth(TestCase):
         ws = MockWebSocket()
         self.client.open_connection(ws)
 
-        self.assertEqual(['{"allowed_rooms": ["{\\"target\\": \\"ride\\"}", "{\\"target\\": \\"car\\"}"]}'], ws.outgoing_messages)
+        res = json.loads(ws.outgoing_messages[0])
+        self.assertCountEqual([room_ride, room_car], res['allowed_rooms'])

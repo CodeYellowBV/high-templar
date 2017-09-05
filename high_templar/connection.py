@@ -28,7 +28,7 @@ class Connection():
         self.user_id = data['user']['id']
         self.allowed_rooms = data['allowed_rooms']
 
-        self.send({'allowed_rooms': [Room.hash_dict(r) for r in self.allowed_rooms]})
+        self.send({'allowed_rooms': self.allowed_rooms})
 
     def handle(self, message):
         if message == 'ping':
