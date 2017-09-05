@@ -34,7 +34,6 @@ setup(
         'gevent >= 1.1.2',
         'greenlet >= 0.4.12',
         'Flask >= 0.12.0',
-        'Flask-Script >= 2.0.5',
         'Flask-Sockets >= 0.2.1',
         'python-dotenv >= 0.6.3',
         'requests >= 2.13.0',
