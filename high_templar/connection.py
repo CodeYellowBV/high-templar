@@ -48,14 +48,32 @@ class Connection():
 
         return self.handle_subscribe(m)
 
-    def is_room_allowed(self, room_hash):
-        return room_hash in [Room.hash_dict(ar) for ar in self.allowed_rooms]
+    # If all keys match for a certain room,
+    def is_room_allowed(self, room_dict):
+        def room_matches(rd, ar):
+            if len(rd.keys()) != len(ar.keys()):
+                return False
+            for ar_key in ar.keys():
+                if ar_key not in rd:
+                    return False
+                if ar[ar_key] == '*':
+                    continue
+                if rd[ar_key] != ar[ar_key]:
+                    return False
+
+            return True
+
+        for ar in self.allowed_rooms:
+            if room_matches(room_dict, ar):
+                return True
+
+        return False
 
     def handle_subscribe(self, m):
         room_dict = m.get('room', None)
         room_hash = Room.hash_dict(room_dict)
 
-        if not self.is_room_allowed(room_hash):
+        if not self.is_room_allowed(room_dict):
             self.send({
                 'requestId': m['requestId'],
                 'code': 'error',
