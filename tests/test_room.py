@@ -39,7 +39,7 @@ class TestRoom(TestCase):
         connection = room.connections[0]
 
         self.assertEqual(ws, connection.ws)
-        self.assertEqual([room], connection.rooms)
+        self.assertEqual([room], [s.room for s in connection.subscriptions.values()])
 
     def test_subscribe_joins_existing(self):
         ws1 = MockWebSocket()
@@ -61,8 +61,8 @@ class TestRoom(TestCase):
 
         c2 = room.connections[1]
         self.assertEqual([c1, c2], room.connections)
-        self.assertEqual([room], c1.rooms)
-        self.assertEqual([room], c2.rooms)
+        self.assertEqual([room], [s.room for s in c1.subscriptions.values()])
+        self.assertEqual([room], [s.room for s in c2.subscriptions.values()])
 
     def test_close_empty_room(self):
         ws = MockWebSocket()

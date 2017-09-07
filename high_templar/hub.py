@@ -56,7 +56,7 @@ class Hub:
 
         for r_name, room in self.rooms.copy().items():
             for c in closed_connections:
-                room.remove_connection(c)
+                c.unsubscribe_all()
 
         return make_response('publish success')
 
@@ -78,10 +78,10 @@ class Hub:
         self.rooms[room_hash] = room
         return room
 
-    def add_to_room(self, connection, request, room_hash):
+    def subscribe(self, connection, request, room_hash):
         room = self.get_or_create_room(room_hash)
-        room.subscribe(connection, request)
-        return room
+        sub = room.subscribe(connection, request)
+        return sub
 
     def close_room(self, room):
         # Clone self.rooms because they may be removed when closed

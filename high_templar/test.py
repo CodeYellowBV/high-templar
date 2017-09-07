@@ -6,6 +6,7 @@ from .hub import Hub
 from .room import Room
 from greenlet import greenlet
 import requests
+import json
 
 
 def mock_environ():
@@ -35,6 +36,12 @@ class TestCase(Case):
         hub = self.client.app.hub
         room_hash = Room.hash_dict(room_dict)
         return hub.rooms[room_hash]
+
+    def trigger(self, data):
+        self.client.flask_test_client.post(
+            '/trigger/',
+            content_type='application/json',
+            data=json.dumps(data))
 
 
 class MockWebSocket:

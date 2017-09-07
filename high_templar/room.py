@@ -10,8 +10,9 @@ class Subscription:
     A subscription of a connection to a room
     '''
 
-    def __init__(self, connection, request):
+    def __init__(self, connection, room, request):
         self.connection = connection
+        self.room = room
         self.requestId = request['requestId']
         self.scope = request.get('scope', {})
 
@@ -24,6 +25,9 @@ class Subscription:
             'type': 'publish',
             'data': data,
         }))
+
+    def stop(self):
+        self.room.remove_subscription(self)
 
 
 class Room:
@@ -46,8 +50,9 @@ class Room:
         self.subscriptions = []
 
     def subscribe(self, connection, request):
-        sub = Subscription(connection, request)
+        sub = Subscription(connection, self, request)
         self.subscriptions.append(sub)
+        return sub
 
     # Don't just unsubscribe: remove all subscriptions for a connection
     def remove_connection(self, connection):
@@ -55,6 +60,11 @@ class Room:
         for s in list(self.subscriptions):
             if s.connection == connection:
                 self.subscriptions.remove(s)
+
+        self.close_if_empty()
+
+    def remove_subscription(self, sub):
+        self.subscriptions.remove(sub)
 
         self.close_if_empty()
 
