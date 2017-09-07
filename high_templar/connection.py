@@ -79,6 +79,7 @@ class Connection():
                 'code': 'error',
                 'message': 'room-not-found',
             })
+            return
 
         room = self.hub.add_to_room(self, m, room_hash)
         self.rooms.append(room)

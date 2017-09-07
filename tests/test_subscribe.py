@@ -79,6 +79,7 @@ class TestAllowedRoomMatch(TestCase):
         ws.mock_incoming_message(json.dumps(subscribe_car))
         self.client.open_connection(ws)
 
+        self.assertEqual(2, len(ws.outgoing_messages))
         self.assertEqual({'requestId': 'a', 'code': 'error', 'message': 'room-not-found'}, json.loads(ws.outgoing_messages[1]))
 
     def test_mismatched_key(self):
@@ -97,4 +98,5 @@ class TestAllowedRoomMatch(TestCase):
         ws.mock_incoming_message(json.dumps(subscribe_car))
         self.client.open_connection(ws)
 
+        self.assertEqual(2, len(ws.outgoing_messages))
         self.assertEqual({'requestId': 'a', 'code': 'error', 'message': 'room-not-found'}, json.loads(ws.outgoing_messages[1]))
