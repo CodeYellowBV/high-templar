@@ -16,11 +16,17 @@ class Adapter:
 
     def check_auth(self, socket):
         ws = socket.ws
+
         headers = {
             'cookie': ws.environ['HTTP_COOKIE'],
             'host': ws.environ['HTTP_HOST'],
             'user-agent': ws.environ['HTTP_USER_AGENT']
         }
+
+        wz_r = ws.environ.get('werkzeug.request', None)
+        if wz_r and 'token' in wz_r.args:
+            headers['Authorization'] = 'Token {}'.format(wz_r.args['token'])
+
         res = requests.get('{}/api/bootstrap/'.format(self.base_url), headers=headers)
 
         if res.status_code != 200:

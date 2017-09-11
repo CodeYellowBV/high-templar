@@ -16,6 +16,22 @@ class TestAuth(TestCase):
         external_url = 'http://{}:{}/api/bootstrap/'.format(django_app_url, django_app_port)
         self.assertEqual(external_url, requests.get.call_args_list[0][0][0])
 
+    def test_token_query_param_to_auth_header(self):
+        class WerkzeugRequest:
+            def __init__(self, token):
+                self.token = token
+
+            @property
+            def args(self):
+                return {'token': self.token}
+
+        ws = MockWebSocket()
+        ws.environ['werkzeug.request'] = WerkzeugRequest('itsmeyourelookingfor')
+        self.client.open_connection(ws)
+        self.assertEqual(1, requests.get.call_count)
+        self.assertTrue('Authorization' in requests.get.call_args_list[0][1]['headers'])
+        self.assertEqual('Token itsmeyourelookingfor', requests.get.call_args_list[0][1]['headers']['Authorization'])
+
     def test_unauth_closed(self):
         def not_authenticated(request, **kwargs):
             return MockResponse({}, 403)
