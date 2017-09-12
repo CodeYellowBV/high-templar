@@ -1,6 +1,6 @@
 import requests
 import json
-from .testapp.app import app, django_app_url, django_app_port
+from .testapp.app import app, api_url
 from high_templar.test import TestCase, Client, MockResponse, MockWebSocket, room_ride, room_car
 
 
@@ -13,7 +13,7 @@ class TestAuth(TestCase):
         self.client.open_connection(ws)
         self.assertEqual(1, requests.get.call_count)
 
-        external_url = 'http://{}:{}/api/bootstrap/'.format(django_app_url, django_app_port)
+        external_url = '{}bootstrap/'.format(api_url)
         self.assertEqual(external_url, requests.get.call_args_list[0][0][0])
 
     def test_token_query_param_to_auth_header(self):

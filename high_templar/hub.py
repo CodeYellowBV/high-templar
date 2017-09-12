@@ -12,7 +12,7 @@ class Adapter:
 
     def __init__(self, app):
         self.app = app
-        self.base_url = 'http://{}:{}'.format(app.config['DJANGO_APP_URL'], app.config['DJANGO_APP_PORT'])
+        self.base_url = app.config['API_URL']
 
     def check_auth(self, socket):
         ws = socket.ws
@@ -27,7 +27,7 @@ class Adapter:
         if wz_r and 'token' in wz_r.args:
             headers['Authorization'] = 'Token {}'.format(wz_r.args['token'])
 
-        res = requests.get('{}/api/bootstrap/'.format(self.base_url), headers=headers)
+        res = requests.get('{}bootstrap/'.format(self.base_url), headers=headers)
 
         if res.status_code != 200:
             return False
