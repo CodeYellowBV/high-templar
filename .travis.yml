@@ -7,8 +7,8 @@ cache:
   pip: true
 install:
   - ./setup.py install
-  - pip install codecov coverage
+  - pip install greenlet codecov coverage
 script:
-  - coverage run --source="high_templar" setup.py test
+  - coverage run --source="high_templar" --concurrency="greenlet" setup.py test
 after_success:
   - codecov
