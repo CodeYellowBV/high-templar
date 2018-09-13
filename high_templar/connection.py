@@ -21,12 +21,10 @@ class Connection():
         except AttributeError:
             pass
 
-    def parse_user(self, user_data):
-        self.user_id = user_data['id']
-
     def handle_auth_success(self, data):
-        self.user_id = data['user']['id']
-        self.allowed_rooms = data['allowed_rooms']
+        user = data.get('user') or {}
+        self.user_id = user.get('id')
+        self.allowed_rooms = data.get('allowed_rooms', [])
 
         self.send({'allowed_rooms': self.allowed_rooms})
 

@@ -43,6 +43,24 @@ class TestAuth(TestCase):
 
         self.assertEqual(True, ws.closed)
 
+
+    def test_auth_but_not_logged_in_closed(self):
+        def not_logged_in(request, **kwargs):
+            return MockResponse({'user': None}, 200)
+
+        self.client.set_mock_api(not_logged_in)
+
+        ws = MockWebSocket()
+        self.client.open_connection(ws)
+
+        # We do get a response, but the rooms are simply empty if
+        # there's no user object in the response.
+        res = json.loads(ws.outgoing_messages[0])
+        self.assertCountEqual([], res['allowed_rooms'])
+
+        self.assertEqual(True, ws.closed)
+
+
     def test_lists_allowed_rooms(self):
         ws = MockWebSocket()
         self.client.open_connection(ws)
