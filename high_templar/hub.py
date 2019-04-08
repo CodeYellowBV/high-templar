@@ -1,4 +1,3 @@
-import requests
 from flask import make_response
 from .room import Room
 from .connection import Connection
@@ -14,25 +13,13 @@ class Adapter:
         self.app = app
         self.base_url = app.config['API_URL']
 
-    def check_auth(self, socket):
-        ws = socket.ws
-
-        headers = {
-            'cookie': ws.environ['HTTP_COOKIE'],
-            'host': ws.environ['HTTP_HOST'],
-            'user-agent': ws.environ['HTTP_USER_AGENT']
-        }
-
-        wz_r = ws.environ.get('werkzeug.request', None)
-        if wz_r and 'token' in wz_r.args:
-            headers['Authorization'] = 'Token {}'.format(wz_r.args['token'])
-
-        res = requests.get('{}bootstrap/'.format(self.base_url), headers=headers)
+    def check_auth(self, connection):
+        res = connection.api.get('bootstrap/')
 
         if res.status_code != 200:
             return False
 
-        socket.handle_auth_success(res.json())
+        connection.handle_auth_success(res.json())
         return True
 
 

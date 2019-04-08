@@ -1,6 +1,54 @@
 import uuid
 import json
 from .room import Room
+import requests
+
+
+class Api:
+
+    def __init__(self, connection):
+        self.URL_FORMAT = '{}{{}}'.format(connection.hub.adapter.base_url)
+
+        self.BASE_HEADERS = {
+            'cookie': connection.ws.environ['HTTP_COOKIE'],
+            'host': connection.ws.environ['HTTP_HOST'],
+            'user-agent': connection.ws.environ['HTTP_USER_AGENT']
+        }
+        wz_r = connection.ws.environ.get('werkzeug.request', None)
+        if wz_r and 'token' in wz_r.args:
+            self.BASE_HEADERS['Authorization'] = (
+                'Token {}'.format(wz_r.args['token'])
+            )
+
+    def request(self, method, url, *args, **kwargs):
+        url = self.URL_FORMAT.format(url)
+
+        kwargs.setdefault('headers', {})
+        for key, value in self.BASE_HEADERS.items():
+            kwargs['headers'].setdefault(key, value)
+
+        return getattr(requests, method)(url, *args, **kwargs)
+
+    def get(self, *args, **kwargs):
+        return self.request('get', *args, **kwargs)
+
+    def options(self, *args, **kwargs):
+        return self.request('options', *args, **kwargs)
+
+    def head(self, *args, **kwargs):
+        return self.request('head', *args, **kwargs)
+
+    def post(self, *args, **kwargs):
+        return self.request('post', *args, **kwargs)
+
+    def put(self, *args, **kwargs):
+        return self.request('put', *args, **kwargs)
+
+    def patch(self, *args, **kwargs):
+        return self.request('patch', *args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        return self.request('delete', *args, **kwargs)
 
 
 class Connection():
@@ -20,6 +68,8 @@ class Connection():
             ws.connection = self
         except AttributeError:
             pass
+
+        self.api = Api(self)
 
     def handle_auth_success(self, data):
         user = data.get('user') or {}
