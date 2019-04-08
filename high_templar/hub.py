@@ -46,6 +46,9 @@ class Hub:
         self.rooms = {}
         self.adapter = Adapter(app)
 
+        self.connect_hooks = []
+        self.disconnect_hooks = []
+
     def handle_trigger(self, body):
         if 'rooms' not in body:
             return make_response('rooms not specified', 400)
@@ -95,3 +98,9 @@ class Hub:
         for r_name, r in rooms.items():
             if r == room:
                 del self.rooms[r_name]
+
+    def on_connect(self, func):
+        self.connect_hooks.append(func)
+
+    def on_disconnect(self, func):
+        self.disconnect_hooks.append(func)

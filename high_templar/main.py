@@ -23,6 +23,10 @@ def create_app(settings=None):
             return
 
         connection = auth
+
+        for hook in app.hub.connect_hooks:
+            hook(connection)
+
         while not connection.ws.closed:
             message = connection.ws.receive()
             if message:
@@ -30,6 +34,9 @@ def create_app(settings=None):
                     connection.handle(message)
                 except Exception as e:
                     logging.error(e, exc_info=True)
+
+        for hook in app.hub.disconnect_hooks:
+            hook(connection)
 
     @app.route('/trigger/', methods=['POST'])
     def handle_trigger():
