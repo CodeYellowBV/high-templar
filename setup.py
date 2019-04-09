@@ -8,13 +8,13 @@ with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
 
 setup(
     name='high_templar',
-    version='2.1.2',
+    version='2.2.0',
     packages=find_packages(include=['high_templar', 'high_templar.*']),
     license='MIT',
     description='A python framework for creating a server which handles websockets for an existing API',
     long_description=README,
-    author='Jasper Stam',
-    author_email='jasper@codeyellow.nl',
+    author='Code Yellow B.V.',
+    author_email='pypi@codeyellow.nl',
     url='https://github.com/CodeYellowBV/high-templar',
     classifiers=[
         'Development Status :: 3 - Alpha',
