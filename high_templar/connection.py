@@ -55,7 +55,7 @@ class Connection():
 
     def handle_auth_success(self, data):
         self.user_id = data
-        for key in self.hub.app.config.get('USER_ID_PATH', ['data', 'id']):
+        for key in self.hub.app.config.get('USER_ID_PATH', ['user', 'id']):
             try:
                 self.user_id = self.user_id[key]
             except (KeyError, IndexError):

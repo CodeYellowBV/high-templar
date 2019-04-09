@@ -14,7 +14,7 @@ allow you to hook custom behavior for when a connection respectively connects
 or disconnects. This hook will receive the connection as only argument.
 - A `USER_ID_PATH` setting was added that allows you to specify which keys
 should be followed to find the user id from the bootstrap response. This
-setting defaults to `['data', 'id']` which is compatible with how it used to
+setting defaults to `['user', 'id']` which is compatible with how it used to
 work.
 
 ## [2.1.2] - 2018-09-14
