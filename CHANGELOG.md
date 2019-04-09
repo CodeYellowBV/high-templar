@@ -16,3 +16,6 @@ or disconnects. This hook will receive the connection as only argument.
 should be followed to find the user id from the bootstrap response. This
 setting defaults to `['data', 'id']` which is compatible with how it used to
 work.
+
+## [2.1.2] - 2018-09-14
+No changelog was kept up until this version.
