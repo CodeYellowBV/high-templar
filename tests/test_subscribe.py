@@ -52,13 +52,12 @@ class TestAllowedRoomMatch(TestCase):
     def test_wildcard(self):
         allowed_car_all = {'target': 'car', 'car': '*'}
 
+        @self.client.set_mock_api
         def allowed_car_wildcard(request, **kwargs):
             return MockResponse({
                 'user': {'id': 1},
                 'allowed_rooms': [allowed_car_all],
             }, 200)
-
-        self.client.set_mock_api(allowed_car_wildcard)
 
         ws = MockWebSocket()
         ws.mock_incoming_message(json.dumps(subscribe_car))
@@ -67,13 +66,12 @@ class TestAllowedRoomMatch(TestCase):
         self.assertEqual({'requestId': 'a', 'code': 'success'}, json.loads(ws.outgoing_messages[1]))
 
     def test_empty_dict(self):
+        @self.client.set_mock_api
         def empty_dict_allowed(request, **kwargs):
             return MockResponse({
                 'user': {'id': 1},
                 'allowed_rooms': [{}],
             }, 200)
-
-        self.client.set_mock_api(empty_dict_allowed)
 
         ws = MockWebSocket()
         ws.mock_incoming_message(json.dumps(subscribe_car))
@@ -83,6 +81,7 @@ class TestAllowedRoomMatch(TestCase):
         self.assertEqual({'requestId': 'a', 'code': 'error', 'message': 'room-not-found'}, json.loads(ws.outgoing_messages[1]))
 
     def test_mismatched_key(self):
+        @self.client.set_mock_api
         def empty_dict_allowed(request, **kwargs):
             return MockResponse({
                 'user': {'id': 1},
@@ -91,8 +90,6 @@ class TestAllowedRoomMatch(TestCase):
                     'foo': 1,
                 }],
             }, 200)
-
-        self.client.set_mock_api(empty_dict_allowed)
 
         ws = MockWebSocket()
         ws.mock_incoming_message(json.dumps(subscribe_car))

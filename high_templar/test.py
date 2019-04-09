@@ -5,9 +5,7 @@ from geventwebsocket.websocket import MSG_ALREADY_CLOSED
 from .hub import Hub
 from .room import Room
 from greenlet import greenlet
-import requests
 import json
-
 
 def mock_environ():
     return {
@@ -41,7 +39,8 @@ class TestCase(Case):
         self.client.flask_test_client.post(
             '/trigger/',
             content_type='application/json',
-            data=json.dumps(data))
+            data=json.dumps(data)
+        )
 
 
 class MockWebSocket:
@@ -82,8 +81,7 @@ class MockWebSocket:
     def receive(self):
         result = None
         # Concurrency loop
-        # This stack can contain a greenlet switch (method)
-        # Or a message receive (str)
+        # This stack can contain a greenlet switch (method) Or a message receive (str)
         while not result:
             if not len(self.pending_actions):
                 self.resume_tests()
@@ -112,16 +110,20 @@ room_car = {'target': 'car', 'car': 1}
 room_car_reverse = {'car': 1, 'target': 'car'}
 
 
-def mock_api(url, **kwargs):
-    return MockResponse({
+def mock_send(request, **kwargs):
+    return MockResponse(
+        status_code=200,
+        json_data={
             'user': {
                 'id': 1,
             },
             'allowed_rooms': [room_ride, room_car],
-        }, 200)
+        },
+    )
 
 
 class Client:
+
     def __init__(self, app):
         self.app = app
         self.app.testing = True
@@ -143,9 +145,9 @@ class Client:
         route(ws)
 
     def set_mock_api(self, func):
-        self._api_mock.side_effect = func
+        self.mock_send.side_effect = func
 
     def _mock_outgoing_requests(self):
-        self._api_mock = mock.MagicMock(side_effect=mock_api)
-        self._outgoing_requests = mock.patch.object(requests, 'get', self._api_mock)
+        self.mock_send = mock.MagicMock(side_effect=mock_send)
+        self._outgoing_requests = mock.patch('requests.Session.send', self.mock_send)
         self._outgoing_requests.start()

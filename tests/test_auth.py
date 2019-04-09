@@ -1,4 +1,3 @@
-import requests
 import json
 from .testapp.app import app, api_url
 from high_templar.test import TestCase, Client, MockResponse, MockWebSocket, room_ride, room_car
@@ -11,10 +10,12 @@ class TestAuth(TestCase):
     def test_incoming_websocket_calls_bootstrap(self):
         ws = MockWebSocket()
         self.client.open_connection(ws)
-        self.assertEqual(1, requests.get.call_count)
+        self.assertEqual(1, self.client.mock_send.call_count)
 
         external_url = '{}bootstrap/'.format(api_url)
-        self.assertEqual(external_url, requests.get.call_args_list[0][0][0])
+        request = self.client.mock_send.call_args_list[0][0][0]
+        self.assertEqual('GET', request.method)
+        self.assertEqual(external_url, request.url)
 
     def test_token_query_param_to_auth_header(self):
         class WerkzeugRequest:
@@ -28,15 +29,15 @@ class TestAuth(TestCase):
         ws = MockWebSocket()
         ws.environ['werkzeug.request'] = WerkzeugRequest('itsmeyourelookingfor')
         self.client.open_connection(ws)
-        self.assertEqual(1, requests.get.call_count)
-        self.assertTrue('Authorization' in requests.get.call_args_list[0][1]['headers'])
-        self.assertEqual('Token itsmeyourelookingfor', requests.get.call_args_list[0][1]['headers']['Authorization'])
+        self.assertEqual(1, self.client.mock_send.call_count)
+        request = self.client.mock_send.call_args_list[0][0][0]
+        self.assertIn('Authorization', request.headers)
+        self.assertEqual('Token itsmeyourelookingfor', request.headers['Authorization'])
 
     def test_unauth_closed(self):
+        @self.client.set_mock_api
         def not_authenticated(request, **kwargs):
             return MockResponse({}, 403)
-
-        self.client.set_mock_api(not_authenticated)
 
         ws = MockWebSocket()
         self.client.open_connection(ws)
@@ -45,10 +46,9 @@ class TestAuth(TestCase):
 
 
     def test_auth_but_not_logged_in_closed(self):
+        @self.client.set_mock_api
         def not_logged_in(request, **kwargs):
             return MockResponse({'user': None}, 200)
-
-        self.client.set_mock_api(not_logged_in)
 
         ws = MockWebSocket()
         self.client.open_connection(ws)
