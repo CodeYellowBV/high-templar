@@ -17,12 +17,10 @@ def create_app(settings=None):
 
     @sockets.route('/ws/')
     def open_socket(ws):
-        auth = app.hub.add_if_auth(ws)
-        if not auth:
+        connection = app.hub.add_if_auth(ws)
+        if not connection:
             # todo manage connection close
             return
-
-        connection = auth
 
         for hook in app.hub.connect_hooks:
             hook(connection)

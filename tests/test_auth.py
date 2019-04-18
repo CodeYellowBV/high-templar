@@ -34,6 +34,23 @@ class TestAuth(TestCase):
         self.assertIn('Authorization', request.headers)
         self.assertEqual('Token itsmeyourelookingfor', request.headers['Authorization'])
 
+    def test_ip_forward(self):
+        ws = MockWebSocket()
+        # Fake nginx IP resolving
+        ws.environ['HTTP_X_REAL_IP'] = '1.2.3.4'
+        self.client.open_connection(ws)
+        self.assertEqual(1, self.client.mock_send.call_count)
+        request = self.client.mock_send.call_args_list[0][0][0]
+        self.assertIn('X-Forwarded-For', request.headers)
+        self.assertEqual('1.2.3.4', request.headers['X-Forwarded-For'])
+
+    def test_ip_forward_not_provided(self):
+        ws = MockWebSocket()
+        self.client.open_connection(ws)
+        self.assertEqual(1, self.client.mock_send.call_count)
+        request = self.client.mock_send.call_args_list[0][0][0]
+        self.assertNotIn('X-Forwarded-For', request.headers)
+
     def test_unauth_closed(self):
         @self.client.set_mock_api
         def not_authenticated(request, **kwargs):

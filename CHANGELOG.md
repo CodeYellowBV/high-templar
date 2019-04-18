@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- A `FORWARD_IP` setting was added that allows you to specify which key from
+the request environment should be used to set the `X-Forwarded-For` header so
+that the requests made appear to come from the original user's IP. By default
+this setting defaults to `None` which disables automatically filling the
+`X-Forwarded-For` header altogether.
 
 ## [2.2.0] - 2019-04-09
 ### Added

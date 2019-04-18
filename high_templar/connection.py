@@ -17,6 +17,9 @@ class Api(Session):
         self.headers['cookie'] = connection.ws.environ['HTTP_COOKIE']
         self.headers['host'] = connection.ws.environ['HTTP_HOST']
         self.headers['user-agent'] = connection.ws.environ['HTTP_USER_AGENT']
+        FORWARD_IP = connection.hub.app.config.get('FORWARD_IP')
+        if FORWARD_IP and FORWARD_IP in connection.ws.environ:
+            self.headers['x-forwarded-for'] = connection.ws.environ[FORWARD_IP]
 
         cookie = parse_cookie(self.headers['cookie'])
         if 'csrftoken' in cookie:
