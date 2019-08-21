@@ -23,12 +23,14 @@ class Subscription:
         if self.connection.ws.closed:
             raise WebSocketClosedError
 
+        message = json.dumps({
+            'requestId': self.requestId,
+            'type': 'publish',
+            'data': data,
+        })
+
         with self.connection._write_lock:
-            self.connection.ws.send(json.dumps({
-                'requestId': self.requestId,
-                'type': 'publish',
-                'data': data,
-            }))
+            self.connection.ws.send(message)
 
     def stop(self):
         self.room.remove_subscription(self)
