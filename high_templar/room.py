@@ -1,5 +1,5 @@
 import json
-
+import threading
 
 class WebSocketClosedError(Exception):
     pass
@@ -16,15 +16,19 @@ class Subscription:
         self.requestId = request['requestId']
         self.scope = request.get('scope', {})
 
+        if not hasattr(self.connection, '_write_lock'):
+            self.connection._write_lock = threading.Lock()
+
     def publish(self, data):
         if self.connection.ws.closed:
             raise WebSocketClosedError
 
-        self.connection.ws.send(json.dumps({
-            'requestId': self.requestId,
-            'type': 'publish',
-            'data': data,
-        }))
+        with self.connection._write_lock:
+            self.connection.ws.send(json.dumps({
+                'requestId': self.requestId,
+                'type': 'publish',
+                'data': data,
+            }))
 
     def stop(self):
         self.room.remove_subscription(self)
