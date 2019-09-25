@@ -57,7 +57,7 @@ class Connection():
 
         self.api = Api(self)
 
-    def get_write_lock():
+    def get_write_lock(self):
         if not hasattr(self, '_write_lock'):
             self._write_lock = threading.Lock()
         return self._write_lock
