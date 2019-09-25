@@ -21,11 +21,11 @@ class Subscription:
         if self.connection.ws.closed:
             raise WebSocketClosedError
 
-        message = json.dumps({
+        message = {
             'requestId': self.requestId,
             'type': 'publish',
             'data': data,
-        })
+        }
 
         self.connection.send(message)
 
