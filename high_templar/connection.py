@@ -6,6 +6,7 @@ from .room import Room
 
 from requests import Session
 from werkzeug.http import parse_cookie
+from geventwebsocket.exceptions import WebSocketError
 
 
 class Api(Session):
@@ -166,4 +167,7 @@ class Connection():
         if self.ws.closed:
             return
         with self.get_write_lock():
-            self.ws.send(json.dumps(message))
+            try:
+                self.ws.send(json.dumps(message))
+            except WebSocketError:
+                pass
