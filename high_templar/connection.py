@@ -1,5 +1,6 @@
 import uuid
 import json
+import threading
 
 from .room import Room
 
@@ -56,6 +57,12 @@ class Connection():
 
         self.api = Api(self)
 
+    def get_write_lock():
+        if not hasattr(self, '_write_lock'):
+            self._write_lock = threading.Lock()
+        return self._write_lock
+
+
     def handle_auth_success(self, data):
         self.user_id = data
         for key in self.hub.app.config.get('USER_ID_PATH', ['user', 'id']):
@@ -71,7 +78,7 @@ class Connection():
 
     def handle(self, message):
         if message == 'ping':
-            self.ws.send('pong')
+            self.send('pong')
             return
 
         m = json.loads(message)
@@ -158,5 +165,5 @@ class Connection():
     def send(self, message):
         if self.ws.closed:
             return
-
-        self.ws.send(json.dumps(message))
+        with self.get_write_lock():
+            self.ws.send(json.dumps(message))

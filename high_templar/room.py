@@ -16,8 +16,6 @@ class Subscription:
         self.requestId = request['requestId']
         self.scope = request.get('scope', {})
 
-        if not hasattr(self.connection, '_write_lock'):
-            self.connection._write_lock = threading.Lock()
 
     def publish(self, data):
         if self.connection.ws.closed:
@@ -29,8 +27,7 @@ class Subscription:
             'data': data,
         })
 
-        with self.connection._write_lock:
-            self.connection.ws.send(message)
+        self.connection.send(message)
 
     def stop(self):
         self.room.remove_subscription(self)
