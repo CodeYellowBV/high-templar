@@ -1,13 +1,14 @@
 sudo: false
 language: python
 python:
-  - "3.4"
   - "3.5"
+  - "3.6"
+  - "3.7"
 cache:
   pip: true
 install:
   - ./setup.py install
-  - pip install greenlet codecov coverage
+  - pip install greenlet codecov coverage gevent
 script:
   - coverage run --source="high_templar" --concurrency="greenlet" setup.py test
 after_success:
