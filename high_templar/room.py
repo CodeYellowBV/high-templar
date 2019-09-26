@@ -1,5 +1,4 @@
 import json
-import threading
 
 class WebSocketClosedError(Exception):
     pass

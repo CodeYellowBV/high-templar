@@ -98,26 +98,28 @@ class Connection():
             'message': 'message-type-not-allowed',
         })
 
-    # If all keys match for a certain room,
-    def is_room_allowed(self, room_dict):
-        def room_matches(rd, ar):
-            if len(rd.keys()) != len(ar.keys()):
+
+    # Check that the requested room's keys match any of the allowed rooms,
+    def is_room_allowed(self, requested_room_dict):
+        def room_matches(ar):
+            if len(requested_room_dict.keys()) != len(ar.keys()):
                 return False
-            for ar_key in ar.keys():
-                if ar_key not in rd:
+            for allowed_key, allowed_value in ar.items():
+                if allowed_key not in requested_room_dict:
                     return False
-                if ar[ar_key] == '*':
+                if allowed_value == '*':
                     continue
-                if rd[ar_key] != ar[ar_key]:
+                if requested_room_dict[allowed_key] != allowed_value:
                     return False
 
             return True
 
         for ar in self.allowed_rooms:
-            if room_matches(room_dict, ar):
+            if room_matches(ar):
                 return True
 
         return False
+
 
     def handle_subscribe(self, m):
         room_dict = m.get('room', None)
