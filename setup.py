@@ -31,7 +31,7 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules'
     ],
     install_requires=[
-        'gevent >= 1.1.2',
+        'gevent >= 1.1.2, < 1.4.0',
         'greenlet >= 0.4.12',
         'Flask >= 0.12.0',
         'Flask-Sockets >= 0.2.1',
