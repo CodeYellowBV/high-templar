@@ -8,7 +8,7 @@ with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
 
 setup(
     name='high_templar',
-    version='2.3.0',
+    version='2.4.0',
     packages=find_packages(include=['high_templar', 'high_templar.*']),
     license='MIT',
     description='A python framework for creating a server which handles websockets for an existing API',
