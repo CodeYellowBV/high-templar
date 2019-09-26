@@ -79,7 +79,7 @@ class Connection():
 
     def handle(self, message):
         if message == 'ping':
-            self.send('pong')
+            self.send_raw('pong')
             return
 
         m = json.loads(message)
@@ -163,11 +163,14 @@ class Connection():
 
         self.subscriptions = {}
 
-    def send(self, message):
+    def send_raw(self, message):
         if self.ws.closed:
             return
         with self.get_write_lock():
             try:
-                self.ws.send(json.dumps(message))
+                self.ws.send(message)
             except WebSocketError:
                 pass
+
+    def send(self, message):
+        self.send_raw(json.dumps(message))
