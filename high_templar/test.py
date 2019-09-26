@@ -107,8 +107,11 @@ class MockResponse:
 
 room_ride = {'target': 'ride'}
 room_car = {'target': 'car', 'car': 1}
+room_other_car = {'target': 'car', 'car': 2}
 room_car_reverse = {'car': 1, 'target': 'car'}
-
+room_bicycle_wildcard = {'target': 'bicycle', 'bycicle': '*'}
+room_bicycle_specific = {'target': 'bicycle', 'bycicle': 1}
+room_other_bicycle_specific = {'target': 'bicycle', 'bycicle': 2}
 
 def mock_send(request, **kwargs):
     return MockResponse(
@@ -117,7 +120,7 @@ def mock_send(request, **kwargs):
             'user': {
                 'id': 1,
             },
-            'allowed_rooms': [room_ride, room_car],
+            'allowed_rooms': [room_ride, room_car, room_bicycle_wildcard],
         },
     )
 

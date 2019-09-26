@@ -1,6 +1,6 @@
 import json
 from .testapp.app import app, api_url
-from high_templar.test import TestCase, Client, MockResponse, MockWebSocket, room_ride, room_car
+from high_templar.test import TestCase, Client, MockResponse, MockWebSocket, room_ride, room_car, room_bicycle_wildcard
 
 
 class TestAuth(TestCase):
@@ -83,4 +83,4 @@ class TestAuth(TestCase):
         self.client.open_connection(ws)
 
         res = json.loads(ws.outgoing_messages[0])
-        self.assertCountEqual([room_ride, room_car], res['allowed_rooms'])
+        self.assertCountEqual([room_ride, room_car, room_bicycle_wildcard], res['allowed_rooms'])

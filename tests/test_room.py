@@ -1,6 +1,6 @@
 import json
 from .testapp.app import app
-from high_templar.test import TestCase, Client, MockWebSocket, room_ride, room_car
+from high_templar.test import TestCase, Client, MockWebSocket, room_ride, room_car, room_other_car, room_bicycle_specific
 from greenlet import greenlet
 
 subscribe_ride = {
@@ -13,13 +13,24 @@ subscribe_car = {
     'type': 'subscribe',
     'room': room_car,
 }
+subscribe_other_car = {
+    'requestId': 'c',
+    'type': 'subscribe',
+    'room': room_other_car,
+}
+subscribe_bicycle_specific = {
+    'requestId': 'd',
+    'type': 'subscribe',
+    'room': room_bicycle_specific,
+}
 
 
 class TestRoom(TestCase):
     def setUp(self):
         self.client = Client(app)
 
-    def test_subcribe_creates_new(self):
+
+    def test_subscribe_creates_new(self):
         ws = MockWebSocket()
         ws.mock_incoming_message(json.dumps(subscribe_ride))
 
@@ -40,6 +51,44 @@ class TestRoom(TestCase):
 
         self.assertEqual(ws, connection.ws)
         self.assertEqual([room], [s.room for s in connection.subscriptions.values()])
+
+
+    def test_subscribe_is_rejected_for_unlisted_room(self):
+        ws = MockWebSocket()
+        ws.mock_incoming_message(json.dumps(subscribe_other_car))
+
+        hub = self.client.app.hub
+
+        self.assertEqual(0, len(hub.rooms.keys()))
+
+        g1 = greenlet(self.client.open_connection)
+        g1.switch(ws)
+
+        self.assertHubRoomsEqual([])
+
+
+    def test_subscribe_specific_is_accepted_for_wildcard_room(self):
+        ws = MockWebSocket()
+        ws.mock_incoming_message(json.dumps(subscribe_bicycle_specific))
+
+        hub = self.client.app.hub
+
+        self.assertEqual(0, len(hub.rooms.keys()))
+
+        g1 = greenlet(self.client.open_connection)
+        g1.switch(ws)
+
+        self.assertHubRoomsEqual([room_bicycle_specific])
+
+        # Test that a room get a reference to its connections
+        # and vice versa
+
+        room = self.getHubRoomByDict(room_bicycle_specific)
+        connection = room.connections[0]
+
+        self.assertEqual(ws, connection.ws)
+        self.assertEqual([room], [s.room for s in connection.subscriptions.values()])
+
 
     def test_subscribe_joins_existing(self):
         ws1 = MockWebSocket()
@@ -64,6 +113,7 @@ class TestRoom(TestCase):
         self.assertEqual([room], [s.room for s in c1.subscriptions.values()])
         self.assertEqual([room], [s.room for s in c2.subscriptions.values()])
 
+
     def test_close_empty_room(self):
         ws = MockWebSocket()
         ws.mock_incoming_message(json.dumps(subscribe_ride))
@@ -77,6 +127,7 @@ class TestRoom(TestCase):
 
         ws.connection.unsubscribe_all()
         self.assertEqual(0, len(hub.rooms.keys()))
+
 
     def test_keeps_open_nonempty_room(self):
         ws1 = MockWebSocket()
