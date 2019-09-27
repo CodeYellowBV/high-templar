@@ -1,5 +1,6 @@
 import json
 
+
 class WebSocketClosedError(Exception):
     pass
 
@@ -15,18 +16,15 @@ class Subscription:
         self.requestId = request['requestId']
         self.scope = request.get('scope', {})
 
-
     def publish(self, data):
         if self.connection.ws.closed:
             raise WebSocketClosedError
 
-        message = {
+        self.connection.send(json.dumps({
             'requestId': self.requestId,
             'type': 'publish',
             'data': data,
-        }
-
-        self.connection.send(message)
+        }))
 
     def stop(self):
         self.room.remove_subscription(self)
