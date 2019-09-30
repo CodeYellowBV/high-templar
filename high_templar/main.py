@@ -2,7 +2,7 @@ from flask_sockets import Sockets
 from flask import Flask, request
 import logging
 import json
-
+import gevent
 
 def create_app(settings=None):
     app = Flask(__name__)
@@ -25,13 +25,17 @@ def create_app(settings=None):
         for hook in app.hub.connect_hooks:
             hook(connection)
 
-        while not connection.ws.closed:
-            message = connection.ws.receive()
+        def process(connection, message):
             if message:
                 try:
                     connection.handle(message)
                 except Exception as e:
                     logging.error(e, exc_info=True)
+
+
+        while not connection.ws.closed:
+            message = connection.ws.receive()
+            gevent.spawn(process, connection, message)
 
         for hook in app.hub.disconnect_hooks:
             hook(connection)
