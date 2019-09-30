@@ -1,9 +1,42 @@
 import uuid
 import json
-from .room import Room
-import logging
+import threading
 
-logger = logging.getLogger(__name__);
+from .room import Room
+
+from requests import Session
+from werkzeug.http import parse_cookie
+from geventwebsocket.exceptions import WebSocketError
+
+
+class Api(Session):
+
+    def __init__(self, connection):
+        super().__init__()
+
+        self.URL_FORMAT = '{}{{}}'.format(connection.hub.adapter.base_url)
+
+        self.headers['cookie'] = connection.ws.environ['HTTP_COOKIE']
+        self.headers['host'] = connection.ws.environ['HTTP_HOST']
+        self.headers['user-agent'] = connection.ws.environ['HTTP_USER_AGENT']
+        FORWARD_IP = connection.hub.app.config.get('FORWARD_IP')
+        if FORWARD_IP and FORWARD_IP in connection.ws.environ:
+            self.headers['x-forwarded-for'] = connection.ws.environ[FORWARD_IP]
+
+        cookie = parse_cookie(self.headers['cookie'])
+        if 'csrftoken' in cookie:
+            self.headers['x-csrftoken'] = cookie['csrftoken']
+
+        wz_r = connection.ws.environ.get('werkzeug.request', None)
+        if wz_r and 'token' in wz_r.args:
+            self.headers['authorization'] = (
+                'Token {}'.format(wz_r.args['token'])
+            )
+
+    def request(self, method, url, *args, **kwargs):
+        url = self.URL_FORMAT.format(url)
+        return super().request(method, url, *args, **kwargs)
+
 
 class Connection():
     ws = None
@@ -23,16 +56,30 @@ class Connection():
         except AttributeError:
             pass
 
+        self.api = Api(self)
+
+    def get_write_lock(self):
+        if not hasattr(self, '_write_lock'):
+            self._write_lock = threading.Lock()
+        return self._write_lock
+
+
     def handle_auth_success(self, data):
-        user = data.get('user') or {}
-        self.user_id = user.get('id')
+        self.user_id = data
+        for key in self.hub.app.config.get('USER_ID_PATH', ['user', 'id']):
+            try:
+                self.user_id = self.user_id[key]
+            except (TypeError, KeyError, IndexError):
+                self.user_id = None
+                break
+
         self.allowed_rooms = data.get('allowed_rooms', [])
 
         self.send({'allowed_rooms': self.allowed_rooms})
 
     def handle(self, message):
         if message == 'ping':
-            self.send('pong')
+            self.send_raw('pong')
             return
 
         m = json.loads(message)
@@ -51,26 +98,28 @@ class Connection():
             'message': 'message-type-not-allowed',
         })
 
-    # If all keys match for a certain room,
-    def is_room_allowed(self, room_dict):
-        def room_matches(rd, ar):
-            if len(rd.keys()) != len(ar.keys()):
+
+    # Check that the requested room's keys match any of the allowed rooms,
+    def is_room_allowed(self, requested_room_dict):
+        def room_matches(ar):
+            if len(requested_room_dict.keys()) != len(ar.keys()):
                 return False
-            for ar_key in ar.keys():
-                if ar_key not in rd:
+            for allowed_key, allowed_value in ar.items():
+                if allowed_key not in requested_room_dict:
                     return False
-                if ar[ar_key] == '*':
+                if allowed_value == '*':
                     continue
-                if rd[ar_key] != ar[ar_key]:
+                if requested_room_dict[allowed_key] != allowed_value:
                     return False
 
             return True
 
         for ar in self.allowed_rooms:
-            if room_matches(room_dict, ar):
+            if room_matches(ar):
                 return True
 
         return False
+
 
     def handle_subscribe(self, m):
         room_dict = m.get('room', None)
@@ -116,14 +165,14 @@ class Connection():
 
         self.subscriptions = {}
 
-    def send(self, message):
+    def send_raw(self, message):
         if self.ws.closed:
             return
-        import gevent
-        def _send(ws, message):	
-            ws.stream.handler.socket.settimeout(0.1)
-            ws.send(json.dumps(message))
-            ws.stream.handler.socket.settimeout(None)
+        with self.get_write_lock():
+            try:
+                self.ws.send(message)
+            except WebSocketError:
+                pass
 
-
-        gevent.spawn(_send, self.ws, message)
+    def send(self, message):
+        self.send_raw(json.dumps(message))
