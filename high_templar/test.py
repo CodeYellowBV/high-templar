@@ -4,6 +4,7 @@ from geventwebsocket.exceptions import WebSocketError
 from geventwebsocket.websocket import MSG_ALREADY_CLOSED
 from .hub import Hub
 from .room import Room
+from tests.testapp.app import app
 from greenlet import greenlet
 import json
 
@@ -16,6 +17,19 @@ def mock_environ():
 
 
 class TestCase(Case):
+    def setUp(self):
+        self.client = Client(app)
+
+
+    def run(self, *args, **kwargs):
+        def mock_spawn(fn, *args, **kwargs):
+            return fn(*args, **kwargs)
+
+        mocked_spawn = mock.MagicMock(side_effect=mock_spawn)
+        with mock.patch('gevent.spawn', mocked_spawn):
+            super().run(*args, **kwargs)
+
+
     # Reset the Hub
     # Otherwise the hub still has the socket of the previous test
     def tearDown(self):
@@ -47,10 +61,19 @@ class MockWebSocket:
     closed = False
     connection = None
 
+    class MagicAttr:
+        def __call__(self, *args, **kwargs):
+            return None
+
+        def __getattr__(self, *args, **kwargs):
+            return self
+
+
     def __init__(self):
         self.environ = mock_environ()
         self.pending_actions = deque()
         self.outgoing_messages = []
+        self.stream = self.MagicAttr()
 
     def send(self, message):
         if self.closed:

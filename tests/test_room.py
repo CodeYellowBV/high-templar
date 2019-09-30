@@ -26,10 +26,6 @@ subscribe_bicycle_specific = {
 
 
 class TestRoom(TestCase):
-    def setUp(self):
-        self.client = Client(app)
-
-
     def test_subscribe_creates_new(self):
         ws = MockWebSocket()
         ws.mock_incoming_message(json.dumps(subscribe_ride))

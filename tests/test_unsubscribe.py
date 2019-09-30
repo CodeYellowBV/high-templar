@@ -27,9 +27,6 @@ unsubscribe_car_2 = {
 
 
 class TestUnsubscribe(TestCase):
-    def setUp(self):
-        self.client = Client(app)
-
     def test_no_more_publish(self):
         ws = MockWebSocket()
         ws.mock_incoming_message(json.dumps(subscribe_car))

@@ -1,12 +1,12 @@
 import uuid
 import json
 import threading
+import gevent
 
 from .room import Room
 
 from requests import Session
 from werkzeug.http import parse_cookie
-from geventwebsocket.exceptions import WebSocketError
 
 
 class Api(Session):
@@ -168,11 +168,12 @@ class Connection():
     def send_raw(self, message):
         if self.ws.closed:
             return
-        with self.get_write_lock():
-            try:
-                self.ws.send(message)
-            except WebSocketError:
-                pass
+        def _send(ws, message):
+            ws.stream.handler.socket.settimeout(0.1)
+            ws.send(message)
+            ws.stream.handler.socket.settimeout(None)
+
+        gevent.spawn(_send, self.ws, message)
 
     def send(self, message):
         self.send_raw(json.dumps(message))

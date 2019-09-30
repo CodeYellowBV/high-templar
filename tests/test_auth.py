@@ -4,9 +4,6 @@ from high_templar.test import TestCase, Client, MockResponse, MockWebSocket, roo
 
 
 class TestAuth(TestCase):
-    def setUp(self):
-        self.client = Client(app)
-
     def test_incoming_websocket_calls_bootstrap(self):
         ws = MockWebSocket()
         self.client.open_connection(ws)

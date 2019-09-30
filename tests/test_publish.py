@@ -45,10 +45,6 @@ publish_bicycle = {
 
 
 class TestPublish(TestCase):
-    def setUp(self):
-        self.client = Client(app)
-
-
     def test_incoming_trigger_gets_published(self):
         ws1 = MockWebSocket()
         ws1.mock_incoming_message(json.dumps(subscribe_ride))

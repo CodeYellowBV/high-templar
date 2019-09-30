@@ -3,9 +3,6 @@ from high_templar.test import TestCase, Client, MockWebSocket
 
 
 class TestKeepalive(TestCase):
-    def setUp(self):
-        self.client = Client(app)
-
     def test_ping_pong(self):
         ws = MockWebSocket()
         ws.mock_incoming_message('ping')

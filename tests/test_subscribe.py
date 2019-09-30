@@ -20,9 +20,6 @@ subscribe_weird = {
 
 
 class TestSubscribe(TestCase):
-    def setUp(self):
-        self.client = Client(app)
-
     def test_subscribe_success(self):
         ws = MockWebSocket()
         ws.mock_incoming_message(json.dumps(subscribe_car))
@@ -46,9 +43,6 @@ class TestSubscribe(TestCase):
 
 
 class TestAllowedRoomMatch(TestCase):
-    def setUp(self):
-        self.client = Client(app)
-
     def test_wildcard(self):
         allowed_car_all = {'target': 'car', 'car': '*'}
 
