@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+- A `CONNECTION_HEADERS` setting was added that allows you to specify custom
+headers that will be sent with every request from a connection. This setting
+accepts a mapping of header names to `connection.header.Header` objects which
+can retrieve values from get params, cookies etc.
 
 ## [2.5.0] - 2019-10-02
 ### Added
