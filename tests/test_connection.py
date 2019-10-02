@@ -3,7 +3,7 @@ from .testapp.app import app, api_url
 from high_templar.test import TestCase, Client, MockResponse, MockWebSocket, room_ride, room_car, room_bicycle_wildcard
 
 
-class TestAuth(TestCase):
+class TestConnection(TestCase):
     def test_incoming_websocket_calls_bootstrap(self):
         ws = MockWebSocket()
         self.client.open_connection(ws)
@@ -13,6 +13,23 @@ class TestAuth(TestCase):
         request = self.client.mock_send.call_args_list[0][0][0]
         self.assertEqual('GET', request.method)
         self.assertEqual(external_url, request.url)
+
+    def test_connection_headers(self):
+        class WerkzeugRequest:
+            def __init__(self, value):
+                self.value = value
+
+            @property
+            def args(self):
+                return {'foo': self.value}
+
+        ws = MockWebSocket()
+        ws.environ['werkzeug.request'] = WerkzeugRequest('bar')
+        self.client.open_connection(ws)
+        self.assertEqual(1, self.client.mock_send.call_count)
+        request = self.client.mock_send.call_args_list[0][0][0]
+        self.assertIn('foo', request.headers)
+        self.assertEqual('BAR', request.headers['foo'])
 
     def test_token_query_param_to_auth_header(self):
         class WerkzeugRequest:

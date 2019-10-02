@@ -1,12 +1,21 @@
 import uuid
 import json
 import threading
+
 import gevent
-
-from .room import Room
-
 from requests import Session
-from werkzeug.http import parse_cookie
+
+from ..room import Room
+from . import header
+
+
+DEFAULT_HEADERS = {
+    'cookie': header.Key('HTTP_COOKIE'),
+    'host': header.Key('HTTP_HOST'),
+    'user-agent': header.Key('HTTP_USER_AGENT'),
+    'x-csrftoken': header.Cookie('csrftoken'),
+    'authorization': header.Param('token').map('Token {}'.format),
+}
 
 
 class Api(Session):
@@ -16,22 +25,23 @@ class Api(Session):
 
         self.URL_FORMAT = '{}{{}}'.format(connection.hub.adapter.base_url)
 
-        self.headers['cookie'] = connection.ws.environ['HTTP_COOKIE']
-        self.headers['host'] = connection.ws.environ['HTTP_HOST']
-        self.headers['user-agent'] = connection.ws.environ['HTTP_USER_AGENT']
         FORWARD_IP = connection.hub.app.config.get('FORWARD_IP')
         if FORWARD_IP and FORWARD_IP in connection.ws.environ:
             self.headers['x-forwarded-for'] = connection.ws.environ[FORWARD_IP]
 
-        cookie = parse_cookie(self.headers['cookie'])
-        if 'csrftoken' in cookie:
-            self.headers['x-csrftoken'] = cookie['csrftoken']
+        headers = connection.hub.app.config.get('CONNECTION_HEADERS')
+        if headers:
+            headers = {**DEFAULT_HEADERS, **headers}
+        else:
+            headers = DEFAULT_HEADERS
 
-        wz_r = connection.ws.environ.get('werkzeug.request', None)
-        if wz_r and 'token' in wz_r.args:
-            self.headers['authorization'] = (
-                'Token {}'.format(wz_r.args['token'])
-            )
+        for key, value in headers.items():
+            try:
+                value = value.get_value(connection.ws.environ)
+            except header.NoValue:
+                pass
+            else:
+                self.headers[key] = value
 
     def request(self, method, url, *args, **kwargs):
         url = self.URL_FORMAT.format(url)
@@ -62,7 +72,6 @@ class Connection():
         if not hasattr(self, '_write_lock'):
             self._write_lock = threading.Lock()
         return self._write_lock
-
 
     def handle_auth_success(self, data):
         self.user_id = data
@@ -121,7 +130,6 @@ class Connection():
 
         return False
 
-
     def handle_subscribe(self, m):
         room_dict = m.get('room', None)
         room_hash = Room.hash_dict(room_dict)
@@ -169,6 +177,7 @@ class Connection():
     def send_raw(self, message):
         if self.ws.closed:
             return
+
         def _send(ws, message):
             ws.stream.handler.socket.settimeout(0.1)
             ws.send(message)
