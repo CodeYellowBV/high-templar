@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [2.5.0] - 2019-10-02
 ### Added
 - `Hub` objects now have the method `on_ping` that allows you to hook custom
 behavior for when a connection receives a ping message from the client. This
@@ -52,7 +54,8 @@ work.
 ## [2.1.2] - 2018-09-14
 No changelog was kept up until this version.
 
-[Unreleased]: https://github.com/CodeYellowBV/high-templar/compare/2.4.2...HEAD
+[Unreleased]: https://github.com/CodeYellowBV/high-templar/compare/2.5.0...HEAD
+[2.5.0]: https://github.com/CodeYellowBV/high-templar/compare/2.4.2...2.5.0
 [2.4.2]: https://github.com/CodeYellowBV/high-templar/compare/2.4.1...2.4.2
 [2.4.1]: https://github.com/CodeYellowBV/high-templar/compare/2.4.0...2.4.1
 [2.4.0]: https://github.com/CodeYellowBV/high-templar/compare/2.3.0...2.4.0
