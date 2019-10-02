@@ -11,6 +11,9 @@ the request environment should be used to set the `X-Forwarded-For` header so
 that the requests made appear to come from the original user's IP. By default
 this setting defaults to `None` which disables automatically filling the
 `X-Forwarded-For` header altogether.
+- `Hub` objects now have the method `on_ping` that allows you to hook custom
+behavior for when a connection receives a ping message from the client. This
+hook will receive the connection as only argument.
 
 ## [2.2.0] - 2019-04-09
 ### Added

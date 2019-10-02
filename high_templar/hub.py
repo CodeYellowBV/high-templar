@@ -34,6 +34,7 @@ class Hub:
         self.adapter = Adapter(app)
 
         self.connect_hooks = []
+        self.ping_hooks = []
         self.disconnect_hooks = []
 
     def handle_trigger(self, body):
@@ -88,6 +89,12 @@ class Hub:
 
     def on_connect(self, func):
         self.connect_hooks.append(func)
+        return func
+
+    def on_ping(self, func):
+        self.ping_hooks.append(func)
+        return func
 
     def on_disconnect(self, func):
         self.disconnect_hooks.append(func)
+        return func

@@ -80,6 +80,8 @@ class Connection():
     def handle(self, message):
         if message == 'ping':
             self.send_raw('pong')
+            for hook in self.hub.ping_hooks:
+                hook(self)
             return
 
         m = json.loads(message)
@@ -97,7 +99,6 @@ class Connection():
             'code': 'error',
             'message': 'message-type-not-allowed',
         })
-
 
     # Check that the requested room's keys match any of the allowed rooms,
     def is_room_allowed(self, requested_room_dict):
