@@ -3,6 +3,7 @@ from flask import Flask, request
 import logging
 import json
 import gevent
+from .rabbitmq import run as runrabbitmq
 
 def create_app(settings=None):
     app = Flask(__name__)
@@ -14,6 +15,8 @@ def create_app(settings=None):
 
     from .hub import Hub
     app.hub = Hub(app)
+
+    gevent.spawn(runrabbitmq, app)
 
     @sockets.route('/ws/')
     def open_socket(ws):
