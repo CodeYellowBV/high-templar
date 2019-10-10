@@ -19,8 +19,6 @@ def consumer_factory(app):
     def consume(channel, method, properties, body):
         try:
             data = json.loads(body)
-
-            print("Handling data")
             with app.app_context():
                 app.hub.handle_trigger(data)
             channel.basic_ack(delivery_tag=method.delivery_tag)
@@ -35,12 +33,13 @@ def consumer_factory(app):
 
 
 def start_consuming(app):
+    config = app.config.get('RABBITMQ')
     # Get a random id for this queue, such that every process/thread has their own queue
 
-    exchange_name = 'hightemplar'
+    exchange_name = config['exchange_name']
 
-    connection_credentials = pika.PlainCredentials('rabbitmq', 'rabbitmq')
-    connection_parameters = pika.ConnectionParameters('localhost', credentials=connection_credentials)
+    connection_credentials = pika.PlainCredentials(config['username'], config['password'])
+    connection_parameters = pika.ConnectionParameters(config['host'], credentials=connection_credentials)
     connection = pika.BlockingConnection(parameters=connection_parameters)
     channel = connection.channel()
     channel.queue_declare(QUEUE_NAME, durable=False)
@@ -56,6 +55,13 @@ def run(app):
     Creates a queue, and attaches it to the exchange. Then listens to messages on the queue, and handles them
     :return:
     """
+    config = app.config.get('RABBITMQ')
+
+    if not config['enabled']:
+        logger.info('Rabbitmq not enabled. Not listening')
+        return
+    logger.info('Rabbitmq enabled. Start listening')
+
     while True:
         try:
             start_consuming(app)

@@ -12,5 +12,13 @@ class Settings:
         'foo': header.Param('foo').map(str.upper),
     }
 
+    RABBITMQ = {
+        'enabled': True,
+        'exchange_name': 'hightemplar',
+        'host': 'localhost',
+        'username': 'rabbitmq',
+        'password': 'rabbitmq'
+    }
+
 
 app = create_app(Settings)
