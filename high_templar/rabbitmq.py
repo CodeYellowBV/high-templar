@@ -5,6 +5,8 @@ import time
 import json
 
 logger = logging.getLogger(__name__)
+queue_id = uuid.uuid4()
+QUEUE_NAME =  'hightemplar_{}'.format(queue_id)
 
 
 def consumer_factory(app):
@@ -17,7 +19,11 @@ def consumer_factory(app):
     def consume(channel, method, properties, body):
         try:
             data = json.loads(body)
-            app.hub.handle_trigger(data)
+
+            print("Handling data")
+            with app.app_context():
+                app.hub.handle_trigger(data)
+            channel.basic_ack(delivery_tag=method.delivery_tag)
         except Exception as e:
             logger.error("Exception during handling of {}".format(body))
             logger.error(e)
@@ -30,19 +36,19 @@ def consumer_factory(app):
 
 def start_consuming(app):
     # Get a random id for this queue, such that every process/thread has their own queue
-    queue_id = uuid.uuid4()
-    queue_name = 'hightemplar_{}'.format(queue_id)
+
     exchange_name = 'hightemplar'
 
     connection_credentials = pika.PlainCredentials('rabbitmq', 'rabbitmq')
     connection_parameters = pika.ConnectionParameters('localhost', credentials=connection_credentials)
-    connection = pika.SelectConnection()
-
+    connection = pika.BlockingConnection(parameters=connection_parameters)
     channel = connection.channel()
-    channel.queue_declare(queue_name, durable=False)
-    channel.queue_bind(queue=queue_name, exchange=exchange_name,
+    channel.queue_declare(QUEUE_NAME, durable=False)
+    channel.queue_bind(queue=QUEUE_NAME, exchange=exchange_name,
                        routing_key='*')
-    channel.basic_consume(consumer_factory(app), queue=queue_name, no_ack=False)
+    channel.basic_consume(on_message_callback=consumer_factory(app), queue=QUEUE_NAME)
+
+    channel.start_consuming()
 
 
 def run(app):
@@ -56,4 +62,4 @@ def run(app):
         except Exception as e:
             logger.error(e)
             logger.error("Serious error. Trying again in a few seconds ")
-            time.sleep(10)
+        time.sleep(10)
