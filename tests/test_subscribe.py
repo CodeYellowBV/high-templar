@@ -13,9 +13,9 @@ subscribe_car_reverse = {
     'room': room_car_reverse,
 }
 subscribe_weird = {
-    'requestId': 'b',
-    'type': 'subscribe',
-    'room': {'foo': 'bar'},
+    "requestId": "b",
+    "type": "subscribe",
+    "room": {"foo": "bar"},
 }
 
 

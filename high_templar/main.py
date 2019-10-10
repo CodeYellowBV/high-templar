@@ -15,7 +15,6 @@ def create_app(settings=None):
 
     from .hub import Hub
     app.hub = Hub(app)
-
     gevent.spawn(runrabbitmq, app)
 
     @sockets.route('/ws/')
