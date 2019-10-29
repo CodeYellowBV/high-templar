@@ -11,7 +11,7 @@ from . import header
 
 DEFAULT_HEADERS = {
     'cookie': header.Key('HTTP_COOKIE'),
-    'host': header.Key('HTTP_HOST'),
+    # 'host': header.Key('HTTP_HOST'),
     'user-agent': header.Key('HTTP_USER_AGENT'),
     'x-csrftoken': header.Cookie('csrftoken'),
     'authorization': header.Param('token').map('Token {}'.format),
