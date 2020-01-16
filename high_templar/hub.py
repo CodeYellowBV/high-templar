@@ -1,6 +1,6 @@
 from flask import make_response
-from .room import Room
-from .connection import Connection
+from room import Room
+from connection import Connection
 
 
 class Adapter:

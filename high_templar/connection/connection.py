@@ -5,7 +5,7 @@ import threading
 import gevent
 from requests import Session
 
-from ..room import Room
+from room import Room
 from . import header
 
 
