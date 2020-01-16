@@ -1,0 +1,18 @@
+version: '3.6'
+
+services:
+  rabbitmq:
+    image: rabbitmq:management
+    ports:
+      - ${RABBIT_MQ_PORT:-5672}:5672
+      - ${RABBIT_MQ_ADMIN_PORT:-15672}:15672
+    environment:
+      RABBITMQ_DEFAULT_USER: rabbitmq
+      RABBITMQ_DEFAULT_PASS: rabbitmq
+
+  backend:
+    build:
+      context: ./
+      dockerfile: docker/backend/Dockerfile
+    volumes:
+      - ./high_templar:/code
