@@ -4,8 +4,19 @@ if __name__ == '__main__':
     class Config:
         def __init__(self):
             self.API_URL = 'foo/bar'
+            self.RABBITMQ = {
+                'enabled': True,
+                'exchange_name': 'hightemplar',
+                'username': 'rabbitmq',
+                'password': 'rabbitmq',
+                'host': 'localhost'
+            }
 
     app = create_app(Config())
 
-    # Don't change from multithreaded to multiprocess. It will brick the server (wtf)
-    app.run(host="0.0.0.0", threaded=False, port=8000, processes=3, debug=True)
+    from gevent import pywsgi, monkey
+    from geventwebsocket.handler import WebSocketHandler
+
+    print('Running server')
+    server = pywsgi.WSGIServer(('', 8000), app, handler_class=WebSocketHandler)
+    server.serve_forever()

@@ -1,5 +1,5 @@
 from flask_sockets import Sockets
-from flask import Flask, request
+from flask import Flask, request, make_response
 import logging
 import json
 import gevent
@@ -16,6 +16,7 @@ def create_app(settings=None):
     from hub import Hub
     app.hub = Hub(app)
     gevent.spawn(runrabbitmq, app)
+
 
     @sockets.route('/ws/')
     def open_socket(ws):
