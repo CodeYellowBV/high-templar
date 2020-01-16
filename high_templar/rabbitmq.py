@@ -42,6 +42,7 @@ def start_consuming(app):
     connection_parameters = pika.ConnectionParameters(config['host'], credentials=connection_credentials)
     connection = pika.BlockingConnection(parameters=connection_parameters)
     channel = connection.channel()
+    channel.exchange_declare(exchange_name)
     channel.queue_declare(QUEUE_NAME, durable=False)
     channel.queue_bind(queue=QUEUE_NAME, exchange=exchange_name,
                        routing_key='*')
