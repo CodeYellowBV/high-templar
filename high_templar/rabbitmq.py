@@ -63,10 +63,10 @@ def run(app):
         return
     logger.info('Rabbitmq enabled. Start listening')
 
-    while True:
-        try:
-            start_consuming(app)
-        except Exception as e:
-            logger.error(e)
-            logger.error("Serious error. Trying again in a few seconds ")
-        time.sleep(10)
+    # while True:
+    #     try:
+    #         start_consuming(app)
+    #     except Exception as e:
+    #         logger.error(e)
+    #         logger.error("Serious error. Trying again in a few seconds ")
+    #     time.sleep(10)

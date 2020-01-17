@@ -16,3 +16,15 @@ services:
       dockerfile: docker/backend/Dockerfile
     volumes:
       - ./high_templar:/code
+    ports:
+        - 5000:5000
+
+  nginx:
+    image: nginx
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - rabbitmq
+      - backend
+    ports:
+      - 8000:8000

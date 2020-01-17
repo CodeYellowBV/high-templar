@@ -20,6 +20,7 @@ def create_app(settings=None):
 
     @sockets.route('/ws/')
     def open_socket(ws):
+
         connection = app.hub.add_if_auth(ws)
         if not connection:
             # todo manage connection close
