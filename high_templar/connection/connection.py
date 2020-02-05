@@ -53,12 +53,14 @@ class Connection():
     hub = None
     user_id = None
 
-    def __init__(self, hub, ws):
+    def __init__(self, hub, ws, app):
         self.ws = ws
         self.hub = hub
         self.subscriptions = {}
         self.allowed_rooms = []
         self.uuid = uuid.uuid4()
+        self.app = app
+
 
         # Nasty hack
         try:
@@ -67,6 +69,8 @@ class Connection():
             pass
 
         self.api = Api(self)
+
+        self.app.logger.debug('Created connection')
 
     def get_write_lock(self):
         if not hasattr(self, '_write_lock'):

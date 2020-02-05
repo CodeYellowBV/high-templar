@@ -17,11 +17,12 @@ def create_app(settings=None):
     app.hub = Hub(app)
     gevent.spawn(runrabbitmq, app)
 
-
     @sockets.route('/ws/')
     def open_socket(ws):
 
-        connection = app.hub.add_if_auth(ws)
+        connection = app.hub.add_if_auth(ws, app)
+        connection.send_raw('pong')
+
         if not connection:
             # todo manage connection close
             return
