@@ -57,8 +57,8 @@ class Hub:
 
         return make_response('publish success')
 
-    def add_if_auth(self, ws):
-        connection = Connection(self, ws)
+    def add_if_auth(self, ws, app):
+        connection = Connection(self, ws, app)
 
         auth = self.adapter.check_auth(connection)
         if not auth:
