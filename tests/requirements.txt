@@ -1,1 +1,3 @@
 websockets==0.2.1
+requests2==2.16.0
+wiremock==1.2.0

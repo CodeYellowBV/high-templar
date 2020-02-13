@@ -19,13 +19,16 @@ services:
     ports:
         - 5000:5000
 
+  wiremock:
+    image: rodolpheche/wiremock
+    ports:
+      - 8080:8080
+
   nginx:
     image: nginx
     volumes:
       - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
- #   depends_on:
- #     - rabbitmq
- #     - backend
     ports:
       - 8000:8000
       - 8001:8001
+

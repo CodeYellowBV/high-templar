@@ -20,8 +20,12 @@ DEFAULT_HEADERS = {
 
 class Api(Session):
 
-    def __init__(self, connection):
+    def __init__(self, app, connection):
         super().__init__()
+
+        self.app = app
+
+        self.app.logger.debug('Api 1')
 
         self.URL_FORMAT = '{}{{}}'.format(connection.hub.adapter.base_url)
 
@@ -29,19 +33,28 @@ class Api(Session):
         if FORWARD_IP and FORWARD_IP in connection.ws.environ:
             self.headers['x-forwarded-for'] = connection.ws.environ[FORWARD_IP]
 
+        self.app.logger.debug('Api 2')
+
         headers = connection.hub.app.config.get('CONNECTION_HEADERS')
         if headers:
             headers = {**DEFAULT_HEADERS, **headers}
         else:
             headers = DEFAULT_HEADERS
 
+        self.app.logger.debug('Api 3')
+
         for key, value in headers.items():
             try:
                 value = value.get_value(connection.ws.environ)
             except header.NoValue:
                 pass
+            except Exception as e:
+                self.app.logger.error('domme exceptie')
+                self.app.logger.error(e)
             else:
                 self.headers[key] = value
+
+        self.app.logger.debug('Api 4')
 
     def request(self, method, url, *args, **kwargs):
         url = self.URL_FORMAT.format(url)
@@ -55,11 +68,14 @@ class Connection():
 
     def __init__(self, hub, ws, app):
         self.ws = ws
+        app.logger.debug('Created connection 1')
         self.hub = hub
         self.subscriptions = {}
         self.allowed_rooms = []
         self.uuid = uuid.uuid4()
         self.app = app
+
+        self.app.logger.debug('Created connection 2')
 
 
         # Nasty hack
@@ -68,9 +84,12 @@ class Connection():
         except AttributeError:
             pass
 
-        self.api = Api(self)
 
-        self.app.logger.debug('Created connection')
+        self.app.logger.debug('Created connection 3')
+
+        self.api = Api(self.app, self)
+
+        self.app.logger.debug('Created connection 4')
 
     def get_write_lock(self):
         if not hasattr(self, '_write_lock'):

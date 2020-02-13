@@ -14,7 +14,7 @@ Flow
 - The client subscribes to one or more rooms
 - When receiving a trigger from the API, the HT instance publishes the received data to the specified rooms.
 
-|architecture|
+
 
 Installation
 ------------
@@ -30,6 +30,20 @@ Django doesn't support websockets out of the box. To add websocket support to Dj
 monkey patch the Django WSGI with gevent, or use django-channels which requires a lot of configuration and needs you to manage its workers.
 
 High-templar uses a similar approach to django-channels, but uses internal HTTP requests to communicate with the existing Django instance. High-templar keeps track of the active websocket connections, which allows the Django instance to remain stateless.
+
+Architecture
+-------------
+|architecture|_
+
+The Rabbitmq rewrite made it possible
+
+
+Other possibilities
+-----------------
+HTAAS
+
+
+
 
 
 Origin
