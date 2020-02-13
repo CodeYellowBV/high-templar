@@ -38,11 +38,28 @@ Architecture
 The Rabbitmq rewrite made it possible
 
 
-Other possibilities
------------------
-HTAAS
 
 
+
+Interfaces
+----------------
+
+When creating a connection, and authentication can be done:
+
+.. code:: json
+
+    {
+        "is_authenticated": True,
+        "allowed_rooms": []
+    }
+
+When creating a connection, and authentication can not be done:
+
+.. code:: json
+
+    {
+        "is_authenticated": False
+    }
 
 
 

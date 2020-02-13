@@ -87,6 +87,8 @@ class Connection():
             except (TypeError, KeyError, IndexError):
                 self.user_id = None
                 break
+        self.app.logger.debug(f"Auth successful. Got data: {data}")
+
 
         self.allowed_rooms = data.get('allowed_rooms', [])
 

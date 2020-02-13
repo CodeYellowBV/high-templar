@@ -30,7 +30,7 @@ def set_bootstrap_response(data):
             ),
             response=MappingResponse(
                 status=200,
-                body=json.dumps({})
+                body=json.dumps(data)
             ),
             persistent=False,
         )
