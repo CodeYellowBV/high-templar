@@ -4,11 +4,15 @@ from unittest import TestCase
 import websockets
 import asyncio
 
-from .wiremock import set_bootstrap_response
+from .utils.wiremock import set_bootstrap_response
 from settings import WS_URI
 
 
-class TestPublish(TestCase):
+class TestSetupConnection(TestCase):
+    """
+    Simple test for setting up a websocket connection
+    """
+
     def test_subscribe_ws_gives_rooms(self):
         set_bootstrap_response({})
 

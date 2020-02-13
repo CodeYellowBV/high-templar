@@ -4,9 +4,11 @@ import logging
 import time
 import json
 
+from pika.adapters.asyncio_connection import AsyncioConnection
+
 logger = logging.getLogger(__name__)
 queue_id = uuid.uuid4()
-QUEUE_NAME =  'hightemplar_{}'.format(queue_id)
+QUEUE_NAME = 'hightemplar_{}'.format(queue_id)
 
 
 def consumer_factory(app):
@@ -40,18 +42,17 @@ def start_consuming(app):
 
     connection_credentials = pika.PlainCredentials(config['username'], config['password'])
     connection_parameters = pika.ConnectionParameters(config['host'], credentials=connection_credentials)
-    connection = pika.BlockingConnection(parameters=connection_parameters)
+    connection = AsyncioConnection(parameters=connection_parameters)
     channel = connection.channel()
     channel.exchange_declare(exchange_name)
     channel.queue_declare(QUEUE_NAME, durable=False)
     channel.queue_bind(queue=QUEUE_NAME, exchange=exchange_name,
                        routing_key='*')
     channel.basic_consume(on_message_callback=consumer_factory(app), queue=QUEUE_NAME)
-
     channel.start_consuming()
 
 
-def run(app):
+async def run(app):
     """
     Creates a queue, and attaches it to the exchange. Then listens to messages on the queue, and handles them
     :return:
@@ -63,10 +64,12 @@ def run(app):
         return
     logger.info('Rabbitmq enabled. Start listening')
 
-    # while True:
-    #     try:
-    #         start_consuming(app)
-    #     except Exception as e:
-    #         logger.error(e)
-    #         logger.error("Serious error. Trying again in a few seconds ")
-    #     time.sleep(10)
+    while True:
+        try:
+            start_consuming(app)
+        except Exception as e:
+            logger.error(e)
+            logger.error("Serious error. Trying again in a few seconds ")
+        time.sleep(10)
+
+    app.logger.debug("START RABBIT<Q!")

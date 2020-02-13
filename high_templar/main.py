@@ -1,25 +1,33 @@
-from flask_sockets import Sockets
-from flask import Flask, request, make_response
+import asyncio
+
+from quart import Quart, request, make_response, websocket
 import logging
 import json
 import gevent
-from rabbitmq import run as runrabbitmq
+
+global_state = 0
 
 def create_app(settings=None):
-    app = Flask(__name__)
+    app = Quart(__name__)
 
     if settings:
         app.config.from_object(settings)
 
-    sockets = Sockets(app)
-
     from hub import Hub
     app.hub = Hub(app)
-    gevent.spawn(runrabbitmq, app)
 
-    @sockets.route('/ws/')
-    def open_socket(ws):
+    @app.websocket('/ws/')
+    async def open_socket():
+
+        global global_state
+        global_state += 1
+        # ?????
+        ws = websocket
+        ws.environ = {}
+        ws.closed =  False
+        app.logger.info(f"open {global_state}")
         connection = app.hub.add_if_auth(ws, app)
+
 
         if not connection:
             # todo manage connection close
@@ -37,13 +45,13 @@ def create_app(settings=None):
 
         while not connection.ws.closed:
             message = connection.ws.receive()
-            gevent.spawn(process, connection, message)
+            asyncio.spawn(process, connection, message)
 
         for hook in app.hub.disconnect_hooks:
             hook(connection)
 
     @app.route('/trigger/', methods=['POST'])
-    def handle_trigger():
+    async def handle_trigger():
         data = json.loads(request.data.decode())
         return app.hub.handle_trigger(data)
 
