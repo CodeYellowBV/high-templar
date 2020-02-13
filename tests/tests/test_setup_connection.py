@@ -36,7 +36,7 @@ class TestSetupConnection(TestCase):
                 self.assertEqual({"is_authorized": False}, json.loads(res))
 
                 sleep(0.1)
-                with self.assertRaises(websockets.ConnectionClosedError):
+                with self.assertRaises(websockets.ConnectionClosedOK):
                     res = await ws.recv()
 
         asyncio.get_event_loop().run_until_complete(run())
