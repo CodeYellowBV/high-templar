@@ -19,9 +19,9 @@ def create_app(settings=None):
 
     @sockets.route('/ws/')
     def open_socket(ws):
+        app.logger.debug('Foo, bar')
 
         connection = app.hub.add_if_auth(ws, app)
-        connection.send_raw('pong')
 
         if not connection:
             # todo manage connection close
@@ -36,7 +36,6 @@ def create_app(settings=None):
                     connection.handle(message)
                 except Exception as e:
                     logging.error(e, exc_info=True)
-
 
         while not connection.ws.closed:
             message = connection.ws.receive()

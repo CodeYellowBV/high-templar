@@ -58,10 +58,11 @@ class Cookie(Header):
         self._key = key
 
     def get_value(self, environ):
-        cookie = parse_cookie(environ['HTTP_COOKIE'])
-        if self._key not in cookie:
+        try:
+            cookie = parse_cookie(environ['HTTP_COOKIE'])
+            return cookie[self._key]
+        except KeyError as e:
             raise NoValue
-        return cookie[self._key]
 
 
 class Fixed(Header):

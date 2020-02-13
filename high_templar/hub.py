@@ -1,3 +1,5 @@
+from typing import Optional
+
 from flask import make_response
 from room import Room
 from connection import Connection
@@ -57,13 +59,19 @@ class Hub:
 
         return make_response('publish success')
 
-    def add_if_auth(self, ws, app):
+    def add_if_auth(self, ws, app) -> Optional[Connection]:
+        """
+        Checks if the user is authenticated, add creates a connection if the authentication is successfull
+        :param ws:
+        :param app:
+        :return:
+        """
         connection = Connection(self, ws, app)
 
         auth = self.adapter.check_auth(connection)
         if not auth:
             ws.close()
-            return False
+            return None
 
         return connection
 
