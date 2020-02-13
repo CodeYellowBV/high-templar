@@ -5,7 +5,11 @@ import logging
 import json
 import gevent
 
+from connection import Connection
+from backend_adapter import BinderAdapter
+
 global_state = 0
+
 
 def create_app(settings=None):
     app = Quart(__name__)
@@ -13,42 +17,16 @@ def create_app(settings=None):
     if settings:
         app.config.from_object(settings)
 
-    from hub import Hub
-    app.hub = Hub(app)
+    # For now, just use the binderadapter
+    backend_adapter = BinderAdapter(app)
 
     @app.websocket('/ws/')
     async def open_socket():
-
-        global global_state
-        global_state += 1
-        # ?????
-        ws = websocket
-        ws.environ = {}
-        ws.closed =  False
-        app.logger.info(f"open {global_state}")
-        connection = app.hub.add_if_auth(ws, app)
-
-
-        if not connection:
-            # todo manage connection close
-            return
-
-        for hook in app.hub.connect_hooks:
-            hook(connection)
-
-        def process(connection, message):
-            if message:
-                try:
-                    connection.handle(message)
-                except Exception as e:
-                    logging.error(e, exc_info=True)
-
-        while not connection.ws.closed:
-            message = connection.ws.receive()
-            asyncio.spawn(process, connection, message)
-
-        for hook in app.hub.disconnect_hooks:
-            hook(connection)
+        # Get out of the global context, and get the actual websocket connection, such that we can understand
+        # what is going
+        ws = websocket._get_current_object()
+        connection = Connection(backend_adapter, app, ws)
+        await connection.run()
 
     @app.route('/trigger/', methods=['POST'])
     async def handle_trigger():
