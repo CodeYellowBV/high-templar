@@ -1,6 +1,6 @@
 from typing import Optional
 
-from flask import make_response
+from quart import make_response
 from room import Room
 from connection import Connection
 

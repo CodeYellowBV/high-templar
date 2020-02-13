@@ -1,7 +1,8 @@
 gevent >= 1.1.2, < 1.4.0
 greenlet >= 0.4.12
-Flask >= 0.12.0
-Flask-Sockets >= 0.2.1
 python-dotenv >= 0.6.3
 requests >= 2.13.0
 pika == 1.1.0
+aiohttp == 3.6.2
+hypercorn == 0.9.0
+quart == 0.11.2

@@ -1,14 +1,7 @@
-#!/usr/bin/env python3
-from gevent import pywsgi, monkey
-
-if __name__ == '__main__':
-    monkey.patch_all()
-
 import os, logging
-
-import werkzeug
 from main import create_app
 from connection import header
+
 
 class Settings:
     API_URL = os.environ.get('CY_BINDER_INTERNAL', 'http://wiremock:8080/api/')
@@ -34,16 +27,4 @@ fh.setLevel(logging.DEBUG)
 app.logger.addHandler(fh)
 
 
-if __name__ == '__main__':
-    from gevent import pywsgi, monkey
-    from geventwebsocket.handler import WebSocketHandler
-
-
-    @werkzeug.serving.run_with_reloader
-    def run():
-        app.logger.debug('Start server!')
-        app.debug = True
-        print('Running server')
-        server = pywsgi.WSGIServer(('', 5000), app, handler_class=WebSocketHandler)
-        server.serve_forever()
-    run()
+application = app

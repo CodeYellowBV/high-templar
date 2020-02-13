@@ -18,6 +18,7 @@ services:
       - ./high_templar:/code
     ports:
         - 5000:5000
+    entrypoint: /code/run
 
   wiremock:
     image: rodolpheche/wiremock
