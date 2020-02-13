@@ -30,7 +30,10 @@ def set_bootstrap_response(data):
             ),
             response=MappingResponse(
                 status=200,
-                body=json.dumps(data)
+                body=json.dumps(data),
+                headers={
+                    'Content-Type': 'application/json'
+                }
             ),
             persistent=False,
         )

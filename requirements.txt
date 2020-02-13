@@ -6,3 +6,4 @@ pika == 1.1.0
 aiohttp == 3.6.2
 hypercorn == 0.9.0
 quart == 0.11.2
+aiohttp_requests==0.1.2

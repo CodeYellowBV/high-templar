@@ -1,6 +1,6 @@
 import os, logging
 from main import create_app
-from connection import header
+# from connection import header
 
 
 class Settings:
@@ -8,7 +8,7 @@ class Settings:
     USER_ID_PATH = ['user', 'data', 'id']
     FORWARD_IP = 'HTTP_X_REAL_IP'
     CONNECTION_HEADERS = {
-        'X-Session-Token': header.Param('session_token'),
+        # 'X-Session-Token': header.Param('session_token'),
     }
     RABBITMQ = {
         'enabled': False,
