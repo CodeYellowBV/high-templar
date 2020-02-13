@@ -22,6 +22,8 @@ class Adapter:
             connection.handle_auth_not_success()
             return False
 
+        self.app.logger.info(f'wafawfawef {res.json()}')
+
         connection.handle_auth_success(res.json())
         return True
 
