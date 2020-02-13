@@ -1,3 +1,4 @@
+import asyncio
 import json
 import time
 import uuid
@@ -67,7 +68,9 @@ class Connection:
     async def run(self):
         if not await self.authenticate():
             await self.send({'is_authorized': False})
-            time.sleep(0.1)
+            # Need a bit of grace time, to allow the other side to actually receive the message before the connection
+            # is broken
+            await asyncio.sleep(0.1)
             return
 
         await self.listen()
