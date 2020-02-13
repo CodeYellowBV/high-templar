@@ -1,3 +1,4 @@
+====================
 high-templar
 ====================
 
@@ -6,7 +7,8 @@ high-templar
 A python framework for creating a stateful server which handles websocket functionality for an existing HTTP only API.
 
 Flow
-----------
+=======
+
 
 - A client opens a websocket connection with a High-templar instance.
 - The HT instance proxies the request to the API, which in turn handles authentication and provides a list of rooms.
@@ -17,14 +19,18 @@ Flow
 
 
 Installation
-------------
+==============
+
+
 
 .. code:: bash
 
     pip install high-templar
 
 Motivation
-----------
+==============
+
+
 This project is created for handling websockets for a django instance.
 Django doesn't support websockets out of the box. To add websocket support to Django, one can either
 monkey patch the Django WSGI with gevent, or use django-channels which requires a lot of configuration and needs you to manage its workers.
@@ -32,7 +38,9 @@ monkey patch the Django WSGI with gevent, or use django-channels which requires 
 High-templar uses a similar approach to django-channels, but uses internal HTTP requests to communicate with the existing Django instance. High-templar keeps track of the active websocket connections, which allows the Django instance to remain stateless.
 
 Architecture
--------------
+==============
+
+
 |architecture|_
 
 The Rabbitmq rewrite made it possible
@@ -42,9 +50,17 @@ The Rabbitmq rewrite made it possible
 
 
 Interfaces
-----------------
+==============
+
+
+Starting a connection
+------------------------
+
+Starting up a connection
 
 When creating a connection, and authentication can be done:
+
+Response:
 
 .. code:: json
 
@@ -55,16 +71,35 @@ When creating a connection, and authentication can be done:
 
 When creating a connection, and authentication can not be done:
 
+Response:
+
 .. code:: json
 
     {
         "is_authenticated": False
     }
 
+Ping pong
+------------------------
 
+The frontend can send a ping message to check if the websocket connection is still working.
+HT will send a pong message if the connection is still open
+
+Request:
+
+.. code:: text
+
+    ping
+
+Response:
+
+.. code:: text
+
+    pong
 
 Origin
-----------
+=======
+
 This repository is based on archon_. Archon is a framework for creating full fledged websocket based CRUD APIs. High-templar is only half the framework of Archon, as it relies on an existing API and only provides pubsub.
 
 
