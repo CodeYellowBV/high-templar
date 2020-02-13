@@ -19,8 +19,6 @@ def create_app(settings=None):
 
     @sockets.route('/ws/')
     def open_socket(ws):
-        app.logger.debug('Foo, bar')
-
         connection = app.hub.add_if_auth(ws, app)
 
         if not connection:

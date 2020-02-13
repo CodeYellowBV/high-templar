@@ -1,13 +1,13 @@
 import uuid
 import json
 import threading
+from time import sleep
 
 import gevent
 from requests import Session
 
 from room import Room
 from . import header
-
 
 DEFAULT_HEADERS = {
     'cookie': header.Key('HTTP_COOKIE'),
@@ -25,15 +25,11 @@ class Api(Session):
 
         self.app = app
 
-        self.app.logger.debug('Api 1')
-
         self.URL_FORMAT = '{}{{}}'.format(connection.hub.adapter.base_url)
 
         FORWARD_IP = connection.hub.app.config.get('FORWARD_IP')
         if FORWARD_IP and FORWARD_IP in connection.ws.environ:
             self.headers['x-forwarded-for'] = connection.ws.environ[FORWARD_IP]
-
-        self.app.logger.debug('Api 2')
 
         headers = connection.hub.app.config.get('CONNECTION_HEADERS')
         if headers:
@@ -41,20 +37,16 @@ class Api(Session):
         else:
             headers = DEFAULT_HEADERS
 
-        self.app.logger.debug('Api 3')
-
         for key, value in headers.items():
             try:
                 value = value.get_value(connection.ws.environ)
             except header.NoValue:
                 pass
             except Exception as e:
-                self.app.logger.error('domme exceptie')
                 self.app.logger.error(e)
+                raise e
             else:
                 self.headers[key] = value
-
-        self.app.logger.debug('Api 4')
 
     def request(self, method, url, *args, **kwargs):
         url = self.URL_FORMAT.format(url)
@@ -68,15 +60,11 @@ class Connection():
 
     def __init__(self, hub, ws, app):
         self.ws = ws
-        app.logger.debug('Created connection 1')
         self.hub = hub
         self.subscriptions = {}
         self.allowed_rooms = []
         self.uuid = uuid.uuid4()
         self.app = app
-
-        self.app.logger.debug('Created connection 2')
-
 
         # Nasty hack
         try:
@@ -84,12 +72,7 @@ class Connection():
         except AttributeError:
             pass
 
-
-        self.app.logger.debug('Created connection 3')
-
         self.api = Api(self.app, self)
-
-        self.app.logger.debug('Created connection 4')
 
     def get_write_lock(self):
         if not hasattr(self, '_write_lock'):
@@ -107,7 +90,25 @@ class Connection():
 
         self.allowed_rooms = data.get('allowed_rooms', [])
 
-        self.send({'allowed_rooms': self.allowed_rooms})
+        self.send({'is_authorized': True, 'allowed_rooms': self.allowed_rooms})
+
+    def handle_auth_not_success(self):
+        """
+        This is called when we can not authenticate ourselves successfully at the binder backend. If this is the
+        case, we send a message with is_authorized = False, and close the connection, such that frontend
+        knows what to do
+
+        :return:
+        """
+
+        # Send a notification that the connection is not authorized. This is mainly meant for debugging why a
+        # connection is not set up.
+        self.send({'is_authorized': False})
+        self.app.logger.debug("Closing connection because can't authorize the user")
+
+        # Make the thread sleep for a bit, to make sure the other end can read the message.
+        sleep(0.1)
+        self.ws.close()
 
     def handle(self, message):
         if message == 'ping':

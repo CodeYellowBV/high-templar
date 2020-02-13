@@ -19,6 +19,7 @@ class Adapter:
         res = connection.api.get('bootstrap/')
 
         if res.status_code != 200:
+            connection.handle_auth_not_success()
             return False
 
         connection.handle_auth_success(res.json())
@@ -70,7 +71,6 @@ class Hub:
 
         auth = self.adapter.check_auth(connection)
         if not auth:
-            ws.close()
             return None
 
         return connection

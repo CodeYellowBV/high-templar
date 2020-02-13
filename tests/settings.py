@@ -1,0 +1,1 @@
+WS_URI = 'ws://localhost:5000/ws/'

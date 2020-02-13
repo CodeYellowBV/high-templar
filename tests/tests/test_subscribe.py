@@ -1,40 +1,43 @@
 import json
+from time import sleep
 from unittest import TestCase
 import websockets
 import asyncio
-from wiremock.constants import Config
-from wiremock.client import Mapping, Mappings
-from wiremock.resources.mappings import MappingRequest, HttpMethods, MappingResponse
 
-Config.base_url = 'http://127.0.0.1:8080/__admin'
-
-mapping = Mapping(
-    priority=100,
-    request=MappingRequest(
-        method=HttpMethods.GET,
-        url='/api/bootstrap/'
-    ),
-    response=MappingResponse(
-        status=200,
-        body=json.dumps({"data": [], "with": {},
-                         "with_mapping": {}, "with_related_name_mapping": {}, "meta": {},
-                         "debug": {"request_id": ""}})
-    ),
-    persistent=False,
-)
-mapping = Mappings.create_mapping(mapping=mapping)
+from .wiremock import set_bootstrap_response
+from settings import WS_URI
 
 
 class TestPublish(TestCase):
     def test_subscribe_ws_gives_rooms(self):
-        uri = 'ws://localhost:5000/ws/'
+
+
+        set_bootstrap_response({})
 
         async def run():
-            async with websockets.connect(uri) as ws:
+            async with websockets.connect(WS_URI) as ws:
                 res = await ws.recv()
 
-                print(res)
+
+                # We do not have access to any rooms
+                self.assertEqual({"is_authorized": True, "allowed_rooms": []}, json.loads(res))
 
         asyncio.get_event_loop().run_until_complete(run())
 
-        # asyncio.get_event_loop().run_until_complete(run2())
+    def test_subscribe_ws_not_logged_in_gives_not_logged_in(self):
+
+        set_bootstrap_response(None)
+
+        async def run():
+            async with websockets.connect(WS_URI) as ws:
+                res = await ws.recv()
+
+                # We do not have access to any rooms
+                self.assertEqual({"is_authorized": False}, json.loads(res))
+
+                sleep(0.1)
+                with self.assertRaises(websockets.ConnectionClosedError):
+                    res = await ws.recv()
+
+        asyncio.get_event_loop().run_until_complete(run())
+
