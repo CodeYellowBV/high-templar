@@ -16,7 +16,7 @@ async def handle_message(connection, message: str):
     """
 
     if message == 'ping':
-        return await ping()
+        return await ping(connection, message)
 
     try:
         message_content = json.loads(message)
