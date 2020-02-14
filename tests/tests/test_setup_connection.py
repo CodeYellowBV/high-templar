@@ -65,3 +65,29 @@ class TestSetupConnection(TestCase):
                 self.assertEquals('pong', await ws.recv())
 
         asyncio.get_event_loop().run_until_complete(run())
+
+    def test_unsupported_action_gives_error(self):
+        set_bootstrap_response({})
+
+        async def run():
+            async with websockets.connect(WS_URI) as ws:
+                allowed_rooms = await ws.recv()
+                await ws.send('{"type": "foobar"}')
+                response = json.loads(await ws.recv())
+                self.assertEqual("error", response['code'])
+                self.assertEqual("message-type-not-allowed", response['message'])
+
+        asyncio.get_event_loop().run_until_complete(run())
+
+    def test_non_json_message_gives_error(self):
+        set_bootstrap_response({})
+
+        async def run():
+            async with websockets.connect(WS_URI) as ws:
+                allowed_rooms = await ws.recv()
+                await ws.send('geen json')
+                response = json.loads(await ws.recv())
+                self.assertEqual("error", response['code'])
+                self.assertEqual("non-json-message", response['message'])
+
+        asyncio.get_event_loop().run_until_complete(run())

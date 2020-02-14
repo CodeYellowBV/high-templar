@@ -1,18 +1,23 @@
 import asyncio
 
 from quart import Quart, request, make_response, websocket
-import logging
 import json
-import gevent
 
 from connection import Connection
 from backend_adapter import BinderAdapter
+from rabbitmq import run as run_rabbitmq
 
-global_state = 0
+
+class HTQuart(Quart):
+    async def __call__(self, *args, **kwargs):
+        return await asyncio.gather(
+            super().__call__(*args, **kwargs),
+            run_rabbitmq(self)
+        )
 
 
 def create_app(settings=None):
-    app = Quart(__name__)
+    app = HTQuart(__name__)
 
     if settings:
         app.config.from_object(settings)

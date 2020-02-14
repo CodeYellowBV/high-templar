@@ -21,7 +21,7 @@ class Connection:
         self.authentication = None
 
         # Create an identification for the connection for debugging and such
-        self.ID = uuid.uuid4()
+        self.ID = str(uuid.uuid4())
 
         self.app.logger.debug("{} Created connection".format(self.ID))
         self.app.logger.debug("{} Headers: {}".format(self.ID, self.websocket.headers))
