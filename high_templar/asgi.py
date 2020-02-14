@@ -3,6 +3,9 @@ from main import create_app
 # from connection import header
 
 
+import asyncio
+
+
 class Settings:
     API_URL = os.environ.get('CY_BINDER_INTERNAL', 'http://wiremock:8080/api/')
     USER_ID_PATH = ['user', 'data', 'id']
@@ -11,7 +14,7 @@ class Settings:
         # 'X-Session-Token': header.Param('session_token'),
     }
     RABBITMQ = {
-        'enabled': False,
+        'enabled': True,
         'exchange_name': 'hightemplar',
         'username': 'rabbitmq',
         'password': 'rabbitmq',
