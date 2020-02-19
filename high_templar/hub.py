@@ -1,5 +1,7 @@
 from connection import Connection
 
+from authentication import Permission
+
 
 class Room:
     """
@@ -60,7 +62,7 @@ class Hub:
         for subscription in self.subscriptions.get(connection, []):
             self.unsubscribe(connection, subscription)
 
-    def subscribe(self, connection: Connection, subscription: dict):
+    def subscribe(self, connection: Connection, subscription: Permission):
         if subscription in self.rooms:
             room = self.rooms[subscription]
         else:
@@ -70,7 +72,7 @@ class Hub:
         self.subscriptions[connection.ID].add(subscription)
         room.add_connection(connection)
 
-    def unsubscribe(self, connection: Connection, subscription: dict):
+    def unsubscribe(self, connection: Connection, subscription: Permission):
         room = self.rooms[subscription]
         room.remove_connection(connection)
 

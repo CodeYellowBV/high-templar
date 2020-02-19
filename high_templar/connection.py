@@ -45,7 +45,7 @@ class Connection:
             # TODO: Send allowed rooms
             await self.send({
                 "is_authorized": True,
-                'allowed_rooms': self.authentication.allowed_rooms
+                'allowed_rooms': self.authentication.json_serializable()
             })
             return True
 
