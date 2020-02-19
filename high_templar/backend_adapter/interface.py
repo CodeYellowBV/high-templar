@@ -1,13 +1,7 @@
 import json
 from typing import List
 
-
-class Authentication:
-    def __init__(self, allowed_rooms: List):
-        self.allowed_rooms = allowed_rooms
-
-    def __str__(self):
-        return "Authentication: Allowed rooms {}".format(json.dumps(self.allowed_rooms))
+from authentication import Authentication
 
 
 class BackendConnectionException(Exception):
@@ -15,6 +9,10 @@ class BackendConnectionException(Exception):
 
 
 class NoBackendConnectionException(BackendConnectionException):
+    pass
+
+
+class UnparsableBackendPermissionsException(BackendConnectionException):
     pass
 
 

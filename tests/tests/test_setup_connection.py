@@ -43,7 +43,9 @@ class TestSetupConnection(TestCase):
 
     def test_subscribe_ws_gives_authenticated_rooms(self):
         set_bootstrap_response({
-            "allowed_rooms": ["Foo", "bar"]
+            "allowed_rooms": [{
+                "target": "foo"
+            }]
         })
 
         async def run():
@@ -51,7 +53,21 @@ class TestSetupConnection(TestCase):
                 res = await ws.recv()
 
                 # We do not have access to any rooms
-                self.assertEqual({"is_authorized": True, "allowed_rooms": ["Foo", "bar"]}, json.loads(res))
+                self.assertEqual({"is_authorized": True, "allowed_rooms": [{
+                    "target": "foo"
+                }]}, json.loads(res))
+
+        asyncio.get_event_loop().run_until_complete(run())
+
+    def test_not_authorized_on_not_parsable_permission(self):
+        set_bootstrap_response({
+            "allowed_rooms": ["foo"]
+        })
+
+        async def run():
+            async with websockets.connect(WS_URI) as ws:
+                response = json.loads(await ws.recv())
+                self.assertFalse(response['is_authorized'])
 
         asyncio.get_event_loop().run_until_complete(run())
 
