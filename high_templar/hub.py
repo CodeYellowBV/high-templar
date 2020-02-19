@@ -1,6 +1,7 @@
 from connection import Connection
 
 from authentication import Permission
+import json
 
 
 class NoPermissionException(Exception):
@@ -51,7 +52,6 @@ class Hub:
 
     def __init__(self, app):
         self.app = app
-        self.rooms = {}
 
         # mapping of connection.ID => connection object
         self.connections = {}
@@ -72,12 +72,13 @@ class Hub:
     def deregister(self, connection: Connection):
         # Unsubscribe from all rooms
         connection.app.logger.debug("HUB: Deregistering {}.".format(connection.ID))
-        for subscription in self.subscriptions.get(connection.ID, []):
+        subscriptions = list(self.subscriptions.get(connection.ID, []))
+        for subscription in subscriptions:
             try:
                 self.unsubscribe(connection, subscription)
             except NotSubscribedException:
                 pass
-            
+
         # Note that if we deregister, it doesn't necessarily mean that the connection is registered. Hence the safety
         # checks
         if connection.ID in self.subscriptions:
@@ -110,6 +111,9 @@ class Hub:
         if subscription not in self.rooms:
             raise NotSubscribedException()
         room = self.rooms[subscription]
+
+        self.subscriptions[connection.ID].remove(subscription)
+
         room_empty = room.remove_connection(connection)
         if room_empty:
             self.app.logger.debug("HUB: Deleted room {}".format(room.subscription))
@@ -137,3 +141,41 @@ class Hub:
             "open_connections": num_connections,
             "num_rooms": num_rooms
         }
+
+    async def dispatch_message(self, message):
+        try:
+            self.app.logger.info("Dispatch message: {}".format(message))
+            content = json.loads(message)
+
+            message_permissions = list(
+                map(lambda x: Permission(x), content['rooms'])
+            )
+            data = content['data']
+
+            rooms_to_dispatch_to = []
+
+            # Get all the rooms for which this message may be important
+            for room in self.rooms.values():
+                self.app.logger.debug(">>>> {} ".format(room))
+                # Check all the rooms for those which have a permission to this message, and (maybe) nmore
+                for permission in message_permissions:
+                    self.app.logger.debug("{} {}".format(type(permission), type(room.subscription)))
+                    if permission <= room.subscription:
+                        rooms_to_dispatch_to.append(room)
+                        break
+
+            # Get all the connections to dispatch to:
+            connections_to_dispatch_to = set().union(*[set(room.connections.keys()) for room in rooms_to_dispatch_to])
+
+            for connection_id in connections_to_dispatch_to:
+                await self.connections[connection_id].send(data)
+
+            self.app.logger.debug("Dispatch message to {} connections".format(len(connections_to_dispatch_to)))
+
+        except Exception as e:
+            """
+            Make sure that all errors are caught, such that we do not crash the whole thread
+            """
+            self.app.logger.error(e)
+            raise e
+            return
