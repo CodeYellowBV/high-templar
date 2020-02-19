@@ -61,3 +61,62 @@ class TestMessages(TestCase):
                 self.assertEquals(data, res)
 
         asyncio.get_event_loop().run_until_complete(run())
+
+    def test_two_websocket_connections(self):
+        set_bootstrap_response({
+            "allowed_rooms": [{
+                "target": "message",
+                "customer": "1"
+            }]
+        })
+
+        async def run():
+            async with websockets.connect(WS_URI) as ws, \
+                    websockets.connect(WS_URI) as ws2:
+                await ws.recv()
+                await ws2.recv()
+
+                await ws.send(json.dumps({
+                    "type": "subscribe",
+                    "room": {
+                        "target": "message",
+                        "customer": "1"
+                    }
+                }))
+                await ws.recv()
+
+                await ws2.send(json.dumps({
+                    "type": "subscribe",
+                    "room": {
+                        "target": "message",
+                        "customer": "1"
+                    }
+                }))
+                await ws2.recv()
+
+                data = {
+                    "foo": "bar"
+                }
+
+                send_trigger({
+                    "rooms": [
+                        {
+                            "target": "message",
+                            "customer": "1"
+                        }
+
+                    ],
+                    "data": data
+                })
+
+                res = await ws.recv()
+                res = json.loads(res)
+                del res['requestId']
+                self.assertEquals(data, res)
+
+                res = await ws2.recv()
+                res = json.loads(res)
+                del res['requestId']
+                self.assertEquals(data, res)
+
+        asyncio.get_event_loop().run_until_complete(run())

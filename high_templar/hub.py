@@ -1,3 +1,5 @@
+import asyncio
+
 from connection import Connection
 
 from authentication import Permission
@@ -167,10 +169,15 @@ class Hub:
             # Get all the connections to dispatch to:
             connections_to_dispatch_to = set().union(*[set(room.connections.keys()) for room in rooms_to_dispatch_to])
 
+            # Send the message to all connections as a seperate event
+            send_data_futures = []
+
             for connection_id in connections_to_dispatch_to:
-                await self.connections[connection_id].send(data)
+                send_data_futures.append(self.connections[connection_id].send(data))
 
             self.app.logger.debug("Dispatch message to {} connections".format(len(connections_to_dispatch_to)))
+
+            await asyncio.gather(*send_data_futures)
 
         except Exception as e:
             """

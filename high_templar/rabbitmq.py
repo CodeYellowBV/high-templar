@@ -41,4 +41,5 @@ async def run(app):
                 async with message.process():
                     content = message.body.decode()
                     app.logger.debug("RABBITMQ: got message {}".format(content))
-                    await app.hub.dispatch_message(content)
+                    loop = asyncio.get_event_loop()
+                    loop.create_task(app.hub.dispatch_message(content))
