@@ -56,7 +56,7 @@ class TestSubscribe(TestCase):
                     "type": "subscribe",
                     "room": {
                         "target": "foobar",
-                        "customer": "1"
+                        "customer": "2"
                     }
                 }))
 

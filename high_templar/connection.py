@@ -26,10 +26,11 @@ class Connection:
 
     async def send(self, message: dict):
         """
-        Send a json encoded message to the websocket client
+        Send a json encoded message to the websocket client, appended with the connection id
         :param message:
         :return:
         """
+        message['requestId'] = self.ID
         return await self.send_raw(json.dumps(message))
 
     async def send_raw(self, message: str):
