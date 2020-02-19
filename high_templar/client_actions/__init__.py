@@ -4,11 +4,13 @@ from json import JSONDecodeError
 from .ping import ping
 from .subscribe import subscribe
 from .unsubscribe import unsubscribe
+from .status import status
 
 # Registered actions callbacks
 ACTIONS = {
     'subscribe': subscribe,
-    'unsubscribe': unsubscribe
+    'unsubscribe': unsubscribe,
+    'status': status
 }
 
 
