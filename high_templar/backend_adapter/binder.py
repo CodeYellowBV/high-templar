@@ -25,8 +25,8 @@ class BinderAdapter(BackendAdapter):
 
         try:
             return Authentication(allowed_rooms=list(
-                map(lambda x: Permission(x.items()), content.get('allowed_rooms', []))
+                map(lambda x: Permission(x), content.get('allowed_rooms', []))
             ))
-        except AttributeError:
+        except (AttributeError, ValueError):
             self.app.logger.info("Binder: could not understand permissions {}".format(content.get('allowed_rooms')))
             raise UnparsableBackendPermissionsException()
