@@ -82,3 +82,20 @@ class TestPermission(TestCase):
         self.assertFalse(p1 >= p2)
         self.assertFalse(p2 < p1)
         self.assertFalse(p2 <= p1)
+
+    def test_star_permission(self):
+        p1 = Permission({
+            "target": "message",
+            "customer": "1"
+        })
+
+        p2 = Permission({
+            "target": "message",
+            "customer": "*"
+        })
+
+        self.assertTrue(p1 < p2)
+        self.assertTrue(p1 <= p2)
+        self.assertFalse(p1 == p2)
+        self.assertFalse(p1 >= p2)
+        self.assertFalse(p1 > p2)
