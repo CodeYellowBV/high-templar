@@ -19,9 +19,11 @@ class TestSetupConnection(TestCase):
         async def run():
             async with websockets.connect(WS_URI) as ws:
                 res = await ws.recv()
+                res = json.loads(res)
+                del res['requestId']
 
                 # We do not have access to any rooms
-                self.assertEqual({"is_authorized": True, "allowed_rooms": []}, json.loads(res))
+                self.assertEqual({"is_authorized": True, "allowed_rooms": []}, res)
 
         asyncio.get_event_loop().run_until_complete(run())
 
@@ -31,9 +33,11 @@ class TestSetupConnection(TestCase):
         async def run():
             async with websockets.connect(WS_URI) as ws:
                 res = await ws.recv()
+                res = json.loads(res)
+                del res['requestId']
 
                 # We do not have access to any rooms
-                self.assertEqual({"is_authorized": False}, json.loads(res))
+                self.assertEqual({"is_authorized": False}, res)
 
                 sleep(0.1)
                 with self.assertRaises(websockets.ConnectionClosedOK):
@@ -53,9 +57,11 @@ class TestSetupConnection(TestCase):
                 res = await ws.recv()
 
                 # We do not have access to any rooms
+                res = json.loads(res)
+                del res['requestId']
                 self.assertEqual({"is_authorized": True, "allowed_rooms": [{
                     "target": "foo"
-                }]}, json.loads(res))
+                }]}, res)
 
         asyncio.get_event_loop().run_until_complete(run())
 

@@ -69,11 +69,16 @@ class Authentication:
     def __str__(self):
         return "Authentication: Allowed rooms {}".format(json.dumps(self.json_serializable()))
 
-    def is_allowed(self, permission: Permission) -> bool:
+    def has_permission(self, permission: Permission) -> bool:
         """
         Check if the user is allowed to subscribe on a room, based upon the allowed rooms
 
         :param room:
         :return:
         """
-        pass
+        for p in self.allowed_rooms:
+            # Check if we have at least one permission that is bigger than the request permission
+            if p >= permission:
+                return True
+
+        return False

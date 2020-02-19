@@ -3,6 +3,10 @@ from connection import Connection
 from authentication import Permission
 
 
+class NoPermissionException(Exception):
+    pass
+
+
 class Room:
     """
     A collection of subscriptions which have access to a scoped permission.
@@ -62,7 +66,17 @@ class Hub:
         for subscription in self.subscriptions.get(connection, []):
             self.unsubscribe(connection, subscription)
 
-    def subscribe(self, connection: Connection, subscription: Permission):
+    def subscribe(self, connection: Connection, subscription: Permission) -> bool:
+        """
+        Subscribe a connection to a subscription. Returns
+        :param connection:
+        :param subscription:
+        :return:
+        """
+
+        if not connection.authentication.has_permission(subscription):
+            raise NoPermissionException()
+
         if subscription in self.rooms:
             room = self.rooms[subscription]
         else:
@@ -75,7 +89,6 @@ class Hub:
     def unsubscribe(self, connection: Connection, subscription: Permission):
         room = self.rooms[subscription]
         room.remove_connection(connection)
-
 
     def status(self):
         """
