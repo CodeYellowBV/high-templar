@@ -22,8 +22,9 @@ class Room:
     In the case a view_action.own, it would have a maximum of 1 connection.
     """
 
-    def __init__(self):
+    def __init__(self, subscription: Permission):
         # mapping between connection.Id => connection
+        self.subscription = subscription
         self.connections = {}
 
     def add_connection(self, connection):
@@ -37,10 +38,10 @@ class Room:
         """
         if connection.ID not in self.connections:
             raise NotSubscribedException()
-        
+
         del self.connections[connection.ID]
 
-        return len(self.connections) > 0
+        return len(self.connections) == 0
 
 
 class Hub:
@@ -73,6 +74,9 @@ class Hub:
         for subscription in self.subscriptions.get(connection, []):
             self.unsubscribe(connection, subscription)
 
+        del self.subscriptions[connection.ID]
+        del self.connections[connection.ID]
+
     def subscribe(self, connection: Connection, subscription: Permission) -> bool:
         """
         Subscribe a connection to a subscription. Returns
@@ -87,7 +91,8 @@ class Hub:
         if subscription in self.rooms:
             room = self.rooms[subscription]
         else:
-            room = Room()
+            room = Room(subscription)
+            self.app.logger.debug("HUB: Created room {}".format(room.subscription))
             self.rooms[subscription] = room
 
         self.subscriptions[connection.ID].add(subscription)
@@ -97,7 +102,12 @@ class Hub:
         if subscription not in self.rooms:
             raise NotSubscribedException()
         room = self.rooms[subscription]
-        room.remove_connection(connection)
+        room_empty = room.remove_connection(connection)
+        if room_empty:
+            self.app.logger.debug("HUB: Deleted room {}".format(room.subscription))
+            del self.rooms[subscription]
+        else:
+            self.app.logger.debug("HUB: Kept room {}. Alive subscriptions: {}".format(room.subscription, len(room.connections)))
 
     def status(self):
         """
@@ -113,3 +123,8 @@ class Hub:
         open connections: {}
         num_rooms: {}
         """.format(num_connections, num_rooms))
+
+        return {
+            "open_connections": num_connections,
+            "num_rooms": num_rooms
+        }
