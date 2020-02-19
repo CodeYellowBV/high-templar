@@ -7,6 +7,10 @@ class NoPermissionException(Exception):
     pass
 
 
+class NotSubscribedException(Exception):
+    pass
+
+
 class Room:
     """
     A collection of subscriptions which have access to a scoped permission.
@@ -31,6 +35,9 @@ class Room:
         :param connection:
         :return: Should the room be removed
         """
+        if connection.ID not in self.connections:
+            raise NotSubscribedException()
+        
         del self.connections[connection.ID]
 
         return len(self.connections) > 0
@@ -87,6 +94,8 @@ class Hub:
         room.add_connection(connection)
 
     def unsubscribe(self, connection: Connection, subscription: Permission):
+        if subscription not in self.rooms:
+            raise NotSubscribedException()
         room = self.rooms[subscription]
         room.remove_connection(connection)
 
