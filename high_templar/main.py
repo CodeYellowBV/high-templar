@@ -35,9 +35,12 @@ class HTQuart(Quart):
             self.status()
         )
 
-
     async def __call__(self, *args, **kwargs):
-        self.logger.error('<<<<<')
+        """
+        We need to hook into the background task somehow. We currently do this here, but that might not be the best place
+        to do it, since this seems to be called more than once. Hence the hack in background() which checksn if
+        the background is already started.
+        """
         return await asyncio.gather(
             super().__call__(*args, **kwargs),
             self.background()
