@@ -16,16 +16,31 @@ class HTQuart(Quart):
     this allows us to both listen to rabbitmq, as well as handle the connection at the same time
     """
 
+    IS_STARTED = False
+
     async def status(self):
+        HTQuart.IS_STARTED = True
         while True:
+            self.logger.warning(">>>>>> UAUAUAUAU")
             await asyncio.sleep(1)
             self.hub.status()
 
-    async def __call__(self, *args, **kwargs):
+    async def background(self):
+        if HTQuart.IS_STARTED:
+            return
+        HTQuart.IS_STARTED = True
+
         return await asyncio.gather(
-            super().__call__(*args, **kwargs),
             run_rabbitmq(self),
             self.status()
+        )
+
+
+    async def __call__(self, *args, **kwargs):
+        self.logger.error('<<<<<')
+        return await asyncio.gather(
+            super().__call__(*args, **kwargs),
+            self.background()
         )
 
 

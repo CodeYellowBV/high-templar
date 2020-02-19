@@ -73,10 +73,17 @@ class Hub:
         # Unsubscribe from all rooms
         connection.app.logger.debug("HUB: Deregistering {}.".format(connection.ID))
         for subscription in self.subscriptions.get(connection.ID, []):
-            self.unsubscribe(connection, subscription)
-
-        del self.subscriptions[connection.ID]
-        del self.connections[connection.ID]
+            try:
+                self.unsubscribe(connection, subscription)
+            except NotSubscribedException:
+                pass
+            
+        # Note that if we deregister, it doesn't necessarily mean that the connection is registered. Hence the safety
+        # checks
+        if connection.ID in self.subscriptions:
+            del self.subscriptions[connection.ID]
+        if connection.ID in self.connections:
+            del self.connections[connection.ID]
 
     def subscribe(self, connection: Connection, subscription: Permission) -> bool:
         """
@@ -108,7 +115,8 @@ class Hub:
             self.app.logger.debug("HUB: Deleted room {}".format(room.subscription))
             del self.rooms[subscription]
         else:
-            self.app.logger.debug("HUB: Kept room {}. Alive subscriptions: {}".format(room.subscription, len(room.connections)))
+            self.app.logger.debug(
+                "HUB: Kept room {}. Alive subscriptions: {}".format(room.subscription, len(room.connections)))
 
     def status(self):
         """
