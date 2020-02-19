@@ -71,7 +71,8 @@ class Hub:
 
     def deregister(self, connection: Connection):
         # Unsubscribe from all rooms
-        for subscription in self.subscriptions.get(connection, []):
+        connection.app.logger.debug("HUB: Deregistering {}.".format(connection.ID))
+        for subscription in self.subscriptions.get(connection.ID, []):
             self.unsubscribe(connection, subscription)
 
         del self.subscriptions[connection.ID]
