@@ -18,7 +18,7 @@ class HTQuart(Quart):
 
     async def status(self):
         while True:
-            await asyncio.sleep(100)
+            await asyncio.sleep(1)
             self.hub.status()
 
     async def __call__(self, *args, **kwargs):
@@ -48,6 +48,7 @@ def create_app(settings=None):
         try:
             await connection.run()
         finally:
+            app.logger.debug("Closed socket, deregister!: {}".format(connection.ID))
             app.hub.deregister(connection)
 
     @app.route('/trigger/', methods=['POST'])
