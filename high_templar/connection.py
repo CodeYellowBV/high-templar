@@ -1,8 +1,6 @@
 import asyncio
 import json
-import time
 import uuid
-from typing import List
 
 from backend_adapter.interface import BackendConnectionException
 
@@ -66,11 +64,15 @@ class Connection:
             await handle_message(self, message)
 
     async def run(self):
+        # First check if we are authenticated
         if not await self.authenticate():
             await self.send({'is_authorized': False})
             # Need a bit of grace time, to allow the other side to actually receive the message before the connection
             # is broken
             await asyncio.sleep(0.1)
             return
+
+        # Register the connection at the hub
+        self.app.hub.register(self)
 
         await self.listen()

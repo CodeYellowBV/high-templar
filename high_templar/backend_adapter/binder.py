@@ -1,6 +1,7 @@
 from aiohttp_requests import requests
 
-from .interface import NoBackendConnectionException, BackendAdapter, Authentication
+from .interface import NoBackendConnectionException, BackendAdapter, UnparsableBackendPermissionsException
+from authentication import Authentication, Permission
 
 
 class BinderAdapter(BackendAdapter):
@@ -22,4 +23,10 @@ class BinderAdapter(BackendAdapter):
 
         self.app.logger.debug("Binder: Proxy bootstrap. Response: {}".format(content))
 
-        return Authentication(allowed_rooms=content.get('allowed_rooms', []))
+        try:
+            return Authentication(allowed_rooms=list(
+                map(lambda x: Permission(x.items()), content.get('allowed_rooms', []))
+            ))
+        except AttributeError:
+            self.app.logger.info("Binder: could not understand permissions {}".format(content.get('allowed_rooms')))
+            raise UnparsableBackendPermissionsException()
