@@ -3,10 +3,12 @@ from json import JSONDecodeError
 
 from .ping import ping
 from .subscribe import subscribe
+from .unsubscribe import unsubscribe
 
 # Registered actions callbacks
 ACTIONS = {
-    'subscribe': subscribe
+    'subscribe': subscribe,
+    'unsubscribe': unsubscribe
 }
 
 
