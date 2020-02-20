@@ -21,8 +21,7 @@ class HTQuart(Quart):
     async def status(self):
         HTQuart.IS_STARTED = True
         while True:
-            self.logger.warning(">>>>>> UAUAUAUAU")
-            await asyncio.sleep(1)
+            await asyncio.sleep(5)
             self.hub.status()
 
     async def background(self):
@@ -55,14 +54,13 @@ def create_app(settings=None):
         app.config.from_object(settings)
 
     # For now, just use the binderadapter
-    backend_adapter = BinderAdapter(app)
 
     @app.websocket('/ws/')
     async def open_socket():
         # Get out of the global context, and get the actual websocket connection, such that we can understand
         # what is going
         ws = websocket._get_current_object()
-        connection = Connection(backend_adapter, app, ws)
+        connection = Connection(BinderAdapter(app), app, ws)
         try:
             await connection.run()
         finally:

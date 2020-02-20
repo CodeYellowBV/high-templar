@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime
 
 from connection import Connection
 
@@ -47,12 +48,31 @@ class Room:
         return len(self.connections) == 0
 
 
+class Status:
+    """
+    Object taking care of status information of the hub
+    """
+
+    def __init__(self):
+        self.created_at = datetime.now()
+        self.rabbitmq_messages_received = 0
+
+        # how many messages have been send
+        self.ws_messages_send = 0
+
+        # How many ws messages have been queued in general (so are either send, or are send, but not received yet
+        self.ws_messages_send_queued = 0
+        self.ws_messages_send_error = 0
+        self.ws_messages_received = 0
+
+
 class Hub:
     """
     Manages all connections, and distributes incoming triggers
     """
 
     def __init__(self, app):
+        self.hub_status = Status()
         self.app = app
 
         # mapping of connection.ID => connection object
@@ -132,19 +152,39 @@ class Hub:
 
         num_connections = len(self.connections)
         num_rooms = len(self.rooms)
+        online_since = self.hub_status.created_at.isoformat()
+        online_time_str = datetime.now() - self.hub_status.created_at
+        ws_messages_queued = self.hub_status.ws_messages_send_queued - self.hub_status.ws_messages_send_error - self.hub_status.ws_messages_send
 
         self.app.logger.info("""
         STATUS: \n
         open connections: {}
         num_rooms: {}
-        """.format(num_connections, num_rooms))
+        online_since: {} ({})
+        messages_received (rabbitmq, total): {}
+        messages_received (ws, total): {}
+        messages_send (ws, total): {}
+        messages_send (ws, error): {}
+        messages_send (ws, queue): {}
+        """.format(num_connections, num_rooms, online_since, online_time_str,
+                   self.hub_status.rabbitmq_messages_received,
+                   self.hub_status.ws_messages_send,
+                   self.hub_status.ws_messages_received,
+                   self.hub_status.ws_messages_send_error, ws_messages_queued))
 
         return {
             "open_connections": num_connections,
-            "num_rooms": num_rooms
+            "num_rooms": num_rooms,
+            "online_since": online_since,
+            "rabbitmq_messages_received": self.hub_status.rabbitmq_messages_received,
+            "ws_messages_received": self.hub_status.ws_messages_received,
+            "ws_messages_send": self.hub_status.ws_messages_send,
+            "ws_messages_send_error": self.hub_status.ws_messages_send_error,
+            "ws_messages_send_queued": ws_messages_queued
         }
 
     async def dispatch_message(self, message):
+        self.hub_status.rabbitmq_messages_received += 1
         try:
             self.app.logger.info("Dispatch message: {}".format(message))
             content = json.loads(message)
@@ -158,7 +198,6 @@ class Hub:
 
             # Get all the rooms for which this message may be important
             for room in self.rooms.values():
-                self.app.logger.debug(">>>> {} ".format(room))
                 # Check all the rooms for those which have a permission to this message, and (maybe) nmore
                 for permission in message_permissions:
                     self.app.logger.debug("{} {}".format(type(permission), type(room.subscription)))
@@ -172,10 +211,25 @@ class Hub:
             # Send the message to all connections as a seperate event
             send_data_futures = []
 
-            for connection_id in connections_to_dispatch_to:
-                send_data_futures.append(self.connections[connection_id].send(data))
+            async def send_message(connection, data):
+                connection.app.hub.hub_status.ws_messages_send_queued += 1
+
+                try:
+                    await self.connections[connection.ID].send(data)
+                    connection.app.hub.hub_status.ws_messages_send += 1
+                except Exception as e:
+                    connection.app.hub.hub_status.ws_messages_send_error += 1
+                    connection.app.logger.warning("Error when sending message: {}".format(e))
 
             self.app.logger.debug("Dispatch message to {} connections".format(len(connections_to_dispatch_to)))
+            self.app.logger.debug("Sending message to {}".format(connections_to_dispatch_to))
+
+            for connection_id in connections_to_dispatch_to:
+                try:
+                    send_data_futures.append(send_message(self.connections[connection_id], data))
+                except KeyError:
+                    # Happens if the connection with connection_id has been disconnected.
+                    pass
 
             await asyncio.gather(*send_data_futures)
 
@@ -184,5 +238,4 @@ class Hub:
             Make sure that all errors are caught, such that we do not crash the whole thread
             """
             self.app.logger.error(e)
-            raise e
             return
