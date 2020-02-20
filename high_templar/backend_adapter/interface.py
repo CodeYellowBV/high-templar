@@ -1,9 +1,7 @@
 import json
 from typing import List
 
-from authentication import Authentication
-
-
+from high_templar.authentication import Authentication
 
 
 class BackendConnectionException(Exception):

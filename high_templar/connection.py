@@ -2,9 +2,9 @@ import asyncio
 import json
 import uuid
 
-from backend_adapter.interface import BackendConnectionException
+from high_templar.backend_adapter.interface import BackendConnectionException
 
-from client_actions import handle_message
+from high_templar.client_actions import handle_message
 
 
 class Connection:

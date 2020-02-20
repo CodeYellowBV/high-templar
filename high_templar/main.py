@@ -3,11 +3,11 @@ import asyncio
 from quart import Quart, request, make_response, websocket
 import json
 
-from connection import Connection
-from backend_adapter import BinderAdapter
-from rabbitmq import run as run_rabbitmq
+from high_templar.connection import Connection
+from high_templar.backend_adapter import BinderAdapter
+from high_templar.rabbitmq import run as run_rabbitmq
 
-from hub import Hub
+from high_templar.hub import Hub
 
 
 class HTQuart(Quart):
