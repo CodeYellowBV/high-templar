@@ -109,7 +109,7 @@ def create_app(settings=None):
         finally:
             app.logger.debug("Closed socket, deregister!: {}".format(connection.ID))
             app.hub.deregister(connection)
-        await app.notify_disconnect(connection)
+            await app.notify_disconnect(connection)
 
     # @app.route('/trigger/', methods=['POST'])
     # async def handle_trigger():
