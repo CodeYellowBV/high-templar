@@ -215,7 +215,10 @@ class Hub:
                 connection.app.hub.hub_status.ws_messages_send_queued += 1
 
                 try:
-                    await self.connections[connection.ID].send(data)
+                    await self.connections[connection.ID].send({
+                        "type": "publish",
+                        "data": data
+                    })
                     connection.app.hub.hub_status.ws_messages_send += 1
                 except Exception as e:
                     connection.app.hub.hub_status.ws_messages_send_error += 1
