@@ -35,7 +35,7 @@ class BinderAdapter(BackendAdapter, ClientSession):
             else:
                 self.headers[key] = value
 
-        response = await self.get('{}bootstrap/'.format(self.base_url))
+        response = await self.get('bootstrap/'.format(self.base_url))
         if response.status != 200:
             raise NoBackendConnectionException()
 
@@ -50,3 +50,7 @@ class BinderAdapter(BackendAdapter, ClientSession):
         except (AttributeError, ValueError):
             self.app.logger.info("Binder: could not understand permissions {}".format(content.get('allowed_rooms')))
             raise UnparsableBackendPermissionsException()
+
+    async def request(self, method, url, *args, **kwargs):
+        url = self.base_url + url
+        return super().request(method, url, *args, **kwargs)
