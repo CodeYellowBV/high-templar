@@ -18,6 +18,12 @@ class HTQuart(Quart):
 
     IS_STARTED = False
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.connect_hooks = []
+        self.ping_hooks = []
+        self.disconnect_hooks = []
+
     async def status(self):
         HTQuart.IS_STARTED = True
         while True:
@@ -45,6 +51,39 @@ class HTQuart(Quart):
             self.background()
         )
 
+    def on_connect(self, func):
+        self.connect_hooks.append(func)
+        return func
+
+    def on_ping(self, func):
+        self.ping_hooks.append(func)
+        return func
+
+    def on_disconnect(self, func):
+        self.disconnect_hooks.append(func)
+        return func
+
+    async def notify_connect(self, connection):
+        await asyncio.gather(
+            *[
+                hook(connection) for hook in self.connect_hooks
+            ]
+        )
+
+    async def notify_ping(self, connection):
+        await asyncio.gather(
+            *[
+                hook(connection) for hook in self.ping_hooks
+            ]
+        )
+
+    async def notify_disconnect(self, connection):
+        await asyncio.gather(
+            *[
+                hook(connection) for hook in self.disconnect_hooks
+            ]
+        )
+
 
 def create_app(settings=None):
     app = HTQuart(__name__)
@@ -61,11 +100,16 @@ def create_app(settings=None):
         # what is going
         ws = websocket._get_current_object()
         connection = Connection(BinderAdapter(app), app, ws)
+        notify_future = app.notify_connect(connection)
         try:
-            await connection.run()
+            await asyncio.gather(
+                connection.run(),
+                notify_future
+            )
         finally:
             app.logger.debug("Closed socket, deregister!: {}".format(connection.ID))
             app.hub.deregister(connection)
+        await app.notify_disconnect(connection)
 
     @app.route('/trigger/', methods=['POST'])
     async def handle_trigger():
