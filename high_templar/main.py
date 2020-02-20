@@ -111,9 +111,9 @@ def create_app(settings=None):
             app.hub.deregister(connection)
         await app.notify_disconnect(connection)
 
-    @app.route('/trigger/', methods=['POST'])
-    async def handle_trigger():
-        data = json.loads(request.data.decode())
-        return app.hub.handle_trigger(data)
+    # @app.route('/trigger/', methods=['POST'])
+    # async def handle_trigger():
+    #     data = json.loads(request.data.decode())
+    #     return app.hub.handle_trigger(data)
 
     return app

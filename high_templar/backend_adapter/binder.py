@@ -3,10 +3,11 @@ from aiohttp import ClientSession
 from .interface import NoBackendConnectionException, BackendAdapter, UnparsableBackendPermissionsException
 from high_templar.authentication import Authentication, Permission
 from . import header
+from werkzeug.datastructures import Headers
 
 DEFAULT_HEADERS = {
-    'cookie': header.Key('HTTP_COOKIE'),
-    'user-agent': header.Key('HTTP_USER_AGENT'),
+    'cookie': header.Key('Cookie'),
+    'user-agent': header.Key('User-Agent'),
     'x-csrftoken': header.Cookie('csrftoken'),
     'authorization': header.Param('token').map('Token {}'.format),
 }
@@ -23,19 +24,24 @@ class BinderAdapter(BackendAdapter, ClientSession):
         self.app = app
         self.base_url = app.config['API_URL']
         self.forward_ip = app.config.get('FORWARD_IP')
-        self.header_definition = {**DEFAULT_HEADERS, **app.config.get('CONNECTION_HEADERS')}
+        self.header_definition = {**DEFAULT_HEADERS, **app.config.get('CONNECTION_HEADERS', {})}
+        self.headers = {}
 
-    async def get_authentication(self, headers) -> Authentication:
+    async def get_authentication(self, websocket) -> Authentication:
 
         for key, value in self.header_definition.items():
             try:
-                value = value.get_value(headers)
-            except header.NoValue:
-                pass
+                value = value.get_value(websocket)
+            except header.NoValue as e:
+                self.app.logger.debug('Can\'t find header {} {} {}'.format(key, value, e))
             else:
                 self.headers[key] = value
 
+        self.app.logger.debug(websocket.args)
+        self.app.logger.debug(websocket.args.get('session_token'))
+
         response = await self.get('bootstrap/'.format(self.base_url))
+
         if response.status != 200:
             raise NoBackendConnectionException()
 
@@ -51,6 +57,7 @@ class BinderAdapter(BackendAdapter, ClientSession):
             self.app.logger.info("Binder: could not understand permissions {}".format(content.get('allowed_rooms')))
             raise UnparsableBackendPermissionsException()
 
-    async def _request(self, method, url, *args, **kwargs):
+    async def _request(self, method, url, *, headers={}, **kwargs):
         url = self.base_url + url
-        return await super()._request(method, url, *args, **kwargs)
+        headers = {**self.headers, **headers}
+        return await super()._request(method, url, headers=headers,  **kwargs)
