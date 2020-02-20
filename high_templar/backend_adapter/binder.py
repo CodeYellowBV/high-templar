@@ -51,6 +51,6 @@ class BinderAdapter(BackendAdapter, ClientSession):
             self.app.logger.info("Binder: could not understand permissions {}".format(content.get('allowed_rooms')))
             raise UnparsableBackendPermissionsException()
 
-    async def request(self, method, url, *args, **kwargs):
+    async def _request(self, method, url, *args, **kwargs):
         url = self.base_url + url
-        return super().request(method, url, *args, **kwargs)
+        return await super()._request(method, url, *args, **kwargs)
