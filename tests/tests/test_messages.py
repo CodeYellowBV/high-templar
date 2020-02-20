@@ -205,5 +205,4 @@ class TestMessages(TestCase):
                 with self.assertRaises(asyncio.TimeoutError):
                     await asyncio.wait_for(ws.recv(), timeout=2)
 
-
         asyncio.get_event_loop().run_until_complete(run())

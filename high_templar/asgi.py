@@ -1,6 +1,5 @@
 import os, logging
 from main import create_app
-# from connection import header
 
 
 import asyncio
@@ -28,6 +27,5 @@ app.logger.setLevel(logging.DEBUG)
 fh = logging.FileHandler('backend.log')
 fh.setLevel(logging.DEBUG)
 app.logger.addHandler(fh)
-
 
 application = app
