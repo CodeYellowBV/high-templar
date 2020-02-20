@@ -32,7 +32,6 @@ setup(
     ],
     install_requires=[
         'python-dotenv >= 0.6.3',
-        'aiohttp == 3.6.2',
         'aio-pika==6.4.1',
         'hypercorn == 0.9.0',
         'quart == 0.11.2',
