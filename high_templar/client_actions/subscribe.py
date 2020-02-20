@@ -1,8 +1,8 @@
-from authentication import Permission
+from high_templar.authentication import Permission
 
 
 async def subscribe(connection, message):
-    from hub import NoPermissionException
+    from high_templar.hub import NoPermissionException
     permission = Permission(message['room'])
 
     try:

@@ -1,5 +1,5 @@
 import os, logging
-from main import create_app
+from high_templar.main import create_app
 
 
 import asyncio

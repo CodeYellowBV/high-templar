@@ -1,9 +1,9 @@
 import asyncio
 from datetime import datetime
 
-from connection import Connection
+from high_templar.connection import Connection
 
-from authentication import Permission
+from high_templar.authentication import Permission
 import json
 
 

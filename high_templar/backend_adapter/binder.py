@@ -1,7 +1,7 @@
 # from aiohttp_requests import requests
 from aiohttp import ClientSession
 from .interface import NoBackendConnectionException, BackendAdapter, UnparsableBackendPermissionsException
-from authentication import Authentication, Permission
+from high_templar.authentication import Authentication, Permission
 from . import header
 
 DEFAULT_HEADERS = {

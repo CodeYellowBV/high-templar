@@ -15,10 +15,10 @@ services:
       context: ./
       dockerfile: docker/backend/Dockerfile
     volumes:
-      - ./high_templar:/code
+      - ./high_templar:/code/high_templar
     ports:
         - 5000:5000
-    entrypoint: /code/run
+    entrypoint: /code/high_templar/run
 
   wiremock:
     image: rodolpheche/wiremock

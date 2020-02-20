@@ -1,8 +1,8 @@
-from authentication import Permission
+from high_templar.authentication import Permission
 
 
 async def unsubscribe(connection, message):
-    from hub import NotSubscribedException
+    from high_templar.hub import NotSubscribedException
     permission = Permission(message['room'])
 
     try:
