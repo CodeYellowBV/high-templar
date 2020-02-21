@@ -21,14 +21,17 @@ async def run(app):
 
     while True:
         loop = asyncio.get_event_loop()
-        connection = await aio_pika.connect_robust(
-            "amqp://rabbitmq:rabbitmq@rabbitmq", loop=loop
-        )
 
         try:
+            app.logger.debug("Create connection!")
+            connection = await aio_pika.connect_robust(
+                "amqp://rabbitmq:rabbitmq@rabbitmq", loop=loop
+            )
             # Creating channel
+            app.logger.debug("Create channel")
             channel = await connection.channel()
             async with connection:
+                app.logger.debug("create exchange")
                 await channel.declare_exchange(config['exchange_name'])
 
                 queue = await channel.declare_queue(
