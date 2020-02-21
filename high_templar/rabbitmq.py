@@ -48,4 +48,5 @@ async def run(app):
                             loop.create_task(app.hub.dispatch_message(content))
         except Exception as e:
             app.logger.error("Exception in connection with rabbitmq. Back of a bit, and try again")
+            app.logger.exception(e)
             await asyncio.sleep(3)
