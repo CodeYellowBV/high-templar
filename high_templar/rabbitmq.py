@@ -25,14 +25,20 @@ async def run(app):
         try:
             app.logger.debug("Create connection!")
             connection = await aio_pika.connect_robust(
-                "amqp://rabbitmq:rabbitmq@rabbitmq", loop=loop
+                "amqp://{}:{}@{}".format(
+                    config['username'],
+                    config['password'],
+                    config['host']
+                ), loop=loop
             )
             # Creating channel
             app.logger.debug("Create channel")
             channel = await connection.channel()
             async with connection:
-                app.logger.debug("create exchange")
+                app.logger.debug("create exchange {}".format(config['exchange_name']))
                 await channel.declare_exchange(config['exchange_name'])
+
+                app.logger.debug("create queue {}".format(QUEUE_NAME))
 
                 queue = await channel.declare_queue(
                     QUEUE_NAME, auto_delete=True, durable=False
