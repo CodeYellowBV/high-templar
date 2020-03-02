@@ -5,6 +5,7 @@ from high_templar.connection import Connection
 
 from high_templar.authentication import Permission
 import json
+from high_templar.subscription import Subscription
 
 
 class NoPermissionException(Exception):
@@ -22,30 +23,30 @@ class Room:
     A scoped permission would be: See your own actions
     Then there would "exist" a room for every single user with view_action.own scoped permission
     "exist" between quotation marks, because high-templar only creates a room when someone actually subscribes to it.
-    A room keeps track of all connections with the same scoped permission.
-    In the case a view_action.own, it would have a maximum of 1 connection.
+    A room keeps track of all subscriptions with the same scoped permission.
+    In the case a view_action.own, all subscriptions would belong to the same connection
     """
 
-    def __init__(self, subscription: Permission):
-        # mapping between connection.Id => connection
-        self.subscription = subscription
-        self.connections = {}
+    def __init__(self, permission: Permission):
+        # mapping between (connection.Id,  => connection
+        self.permission = permission
+        self.subscriptions = set()
 
-    def add_connection(self, connection):
-        self.connections[connection.ID] = connection
+    def add_subscription(self, subscription: Subscription):
+        self.subscriptions.add(subscription)
 
-    def remove_connection(self, connection) -> bool:
+    def remove_subscription(self, subscription: Subscription) -> bool:
         """
         Remove a connection. Returns a boolean indicating that the room should be removed
-        :param connection:
+        :param subscription:
         :return: Should the room be removed
         """
-        if connection.ID not in self.connections:
+        if subscription not in self.subscriptions:
             raise NotSubscribedException()
 
-        del self.connections[connection.ID]
+        self.subscriptions.discard(subscription)
 
-        return len(self.connections) == 0
+        return len(self.subscriptions) == 0
 
 
 class Status:
@@ -75,26 +76,22 @@ class Hub:
         self.hub_status = Status()
         self.app = app
 
-        # mapping of connection.ID => connection object
-        self.connections = {}
-
-        # mapping of connection => set of routing keys
+        # mapping of connection => subscriptions
         self.subscriptions = {}
 
-        # mapping of routing key => room
+        # mapping of permission  => room
         self.rooms = {}
 
     def register(self, connection: Connection):
         """
         "Registers a connection
         """
-        self.connections[connection.ID] = connection
-        self.subscriptions[connection.ID] = set()
+        self.subscriptions[connection] = set()
 
     def deregister(self, connection: Connection):
         # Unsubscribe from all rooms
-        connection.app.logger.debug("HUB: Deregistering {}.".format(connection.ID))
-        subscriptions = list(self.subscriptions.get(connection.ID, []))
+        connection.app.logger.debug("HUB: Deregistering {}.".format(connection))
+        subscriptions = list(self.subscriptions.get(connection, []))
         for subscription in subscriptions:
             try:
                 self.unsubscribe(connection, subscription)
@@ -103,12 +100,10 @@ class Hub:
 
         # Note that if we deregister, it doesn't necessarily mean that the connection is registered. Hence the safety
         # checks
-        if connection.ID in self.subscriptions:
-            del self.subscriptions[connection.ID]
-        if connection.ID in self.connections:
-            del self.connections[connection.ID]
+        if connection in self.subscriptions:
+            del self.subscriptions[connection]
 
-    def subscribe(self, connection: Connection, subscription: Permission) -> bool:
+    def subscribe(self, subscription: Subscription) -> bool:
         """
         Subscribe a connection to a subscription. Returns
         :param connection:
@@ -116,33 +111,30 @@ class Hub:
         :return:
         """
 
-        if not connection.authentication.has_permission(subscription):
+        if not subscription.connection.authentication.has_permission(subscription.permission):
             raise NoPermissionException()
 
-        if subscription in self.rooms:
-            room = self.rooms[subscription]
+        if subscription.permission in self.rooms:
+            room = self.rooms[subscription.permission]
         else:
-            room = Room(subscription)
-            self.app.logger.debug("HUB: Created room {}".format(room.subscription))
-            self.rooms[subscription] = room
+            room = Room(subscription.permission)
+            self.app.logger.debug("HUB: Created room {}".format(room.permission))
+            self.rooms[subscription.permission] = room
 
-        self.subscriptions[connection.ID].add(subscription)
-        room.add_connection(connection)
+        room.add_subscription(subscription)
 
-    def unsubscribe(self, connection: Connection, subscription: Permission):
-        if subscription not in self.rooms:
+    def unsubscribe(self, subscription: Subscription):
+        if subscription.permission not in self.rooms:
             raise NotSubscribedException()
-        room = self.rooms[subscription]
+        room = self.rooms[subscription.permission]
 
-        self.subscriptions[connection.ID].remove(subscription)
-
-        room_empty = room.remove_connection(connection)
+        room_empty = room.remove_subscription(subscription)
         if room_empty:
-            self.app.logger.debug("HUB: Deleted room {}".format(room.subscription))
-            del self.rooms[subscription]
+            self.app.logger.debug("HUB: Deleted room {}".format(room.permission))
+            del self.rooms[room.permission]
         else:
             self.app.logger.debug(
-                "HUB: Kept room {}. Alive subscriptions: {}".format(room.subscription, len(room.connections)))
+                "HUB: Kept room {}. Alive subscriptions: {}".format(room.permission, len(room.subscriptions)))
 
     def status(self):
         """
@@ -150,7 +142,7 @@ class Hub:
         :return:
         """
 
-        num_connections = len(self.connections)
+        num_connections = len(self.subscriptions)
         num_rooms = len(self.rooms)
         online_since = self.hub_status.created_at.isoformat()
         online_time_str = datetime.now() - self.hub_status.created_at
@@ -195,41 +187,42 @@ class Hub:
             data = content['data']
 
             rooms_to_dispatch_to = []
+            subscriptions_to_dispatch_to = []
 
             # Get all the rooms for which this message may be important
             for room in self.rooms.values():
                 # Check all the rooms for those which have a permission to this message, and (maybe) nmore
                 for permission in message_permissions:
-                    self.app.logger.debug("{} {}".format(type(permission), type(room.subscription)))
-                    if permission <= room.subscription:
+                    self.app.logger.debug("{} {}".format(type(permission), type(room.subscriptions)))
+                    if permission <= room.permission:
                         rooms_to_dispatch_to.append(room)
+                        subscriptions_to_dispatch_to += list(room.subscriptions)
                         break
-
-            # Get all the connections to dispatch to:
-            connections_to_dispatch_to = set().union(*[set(room.connections.keys()) for room in rooms_to_dispatch_to])
 
             # Send the message to all connections as a seperate event
             send_data_futures = []
 
-            async def send_message(connection, data):
+            async def send_message(subscription, data):
+                connection = subscription.connection
                 connection.app.hub.hub_status.ws_messages_send_queued += 1
 
                 try:
-                    await self.connections[connection.ID].send({
+                    await connection.send({
                         "type": "publish",
-                        "data": data
+                        "data": data,
+                        "requestId": subscription.request_id
                     })
                     connection.app.hub.hub_status.ws_messages_send += 1
                 except Exception as e:
                     connection.app.hub.hub_status.ws_messages_send_error += 1
                     connection.app.logger.warning("Error when sending message: {}".format(e))
 
-            self.app.logger.debug("Dispatch message to {} connections".format(len(connections_to_dispatch_to)))
-            self.app.logger.debug("Sending message to {}".format(connections_to_dispatch_to))
+            self.app.logger.debug("Dispatch message to {} subscriptions".format(len(subscriptions_to_dispatch_to)))
+            self.app.logger.debug("Sending message to {}".format(subscriptions_to_dispatch_to))
 
-            for connection_id in connections_to_dispatch_to:
+            for subscription in subscriptions_to_dispatch_to:
                 try:
-                    send_data_futures.append(send_message(self.connections[connection_id], data))
+                    send_data_futures.append(send_message(subscription, data))
                 except KeyError:
                     # Happens if the connection with connection_id has been disconnected.
                     pass

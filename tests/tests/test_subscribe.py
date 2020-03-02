@@ -30,7 +30,8 @@ class TestSubscribe(TestCase):
                     "room": {
                         "target": "message",
                         "customer": "1"
-                    }
+                    },
+                    "requestId": "9a2f3722-5c8f-11ea-bc55-0242ac130003"
                 }))
 
                 res = await ws.recv()
@@ -57,7 +58,8 @@ class TestSubscribe(TestCase):
                     "room": {
                         "target": "foobar",
                         "customer": "2"
-                    }
+                    },
+                    "requestId": "9a2f3722-5c8f-11ea-bc55-0242ac130003"
                 }))
 
                 res = await ws.recv()

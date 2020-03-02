@@ -20,7 +20,7 @@ class TestSetupConnection(TestCase):
             async with websockets.connect(WS_URI) as ws:
                 res = await ws.recv()
                 res = json.loads(res)
-                del res['requestId']
+
 
                 # We do not have access to any rooms
                 self.assertEqual({"is_authorized": True, "allowed_rooms": []}, res)
@@ -34,7 +34,7 @@ class TestSetupConnection(TestCase):
             async with websockets.connect(WS_URI) as ws:
                 res = await ws.recv()
                 res = json.loads(res)
-                del res['requestId']
+
 
                 # We do not have access to any rooms
                 self.assertEqual({"is_authorized": False}, res)
@@ -58,7 +58,6 @@ class TestSetupConnection(TestCase):
 
                 # We do not have access to any rooms
                 res = json.loads(res)
-                del res['requestId']
                 self.assertEqual({"is_authorized": True, "allowed_rooms": [{
                     "target": "foo"
                 }]}, res)
