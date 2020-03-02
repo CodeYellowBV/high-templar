@@ -73,7 +73,8 @@ class TestInternalStatus(TestCase):
                     "room": {
                         "target": "message",
                         "customer": "1"
-                    }
+                    },
+                    "requestId": "71a518e6-ea5e-4d50-bc2c-6761470a22cf"
                 }))
                 await ws.recv()
 
@@ -86,7 +87,8 @@ class TestInternalStatus(TestCase):
                     "type": "subscribe", "room": {
                         "target": "message",
                         "customer": "2"
-                    }
+                    },
+                    "requestId": "a9772e37-1840-4276-928f-8d75e7d0eda2"
                 }))
                 await ws.recv()
 
@@ -99,7 +101,8 @@ class TestInternalStatus(TestCase):
                     "type": "unsubscribe", "room": {
                         "target": "message",
                         "customer": "2"
-                    }
+                    },
+                    "requestId": "a9772e37-1840-4276-928f-8d75e7d0eda2"
                 }))
                 await ws.recv()
 
@@ -113,7 +116,8 @@ class TestInternalStatus(TestCase):
                     "type": "unsubscribe", "room": {
                         "target": "message",
                         "customer": "1"
-                    }
+                    },
+                    "requestId": "71a518e6-ea5e-4d50-bc2c-6761470a22cf"
                 }))
                 await ws.recv()
 
@@ -145,7 +149,8 @@ class TestInternalStatus(TestCase):
                     "room": {
                         "target": "message",
                         "customer": "1"
-                    }
+                    },
+                    "requestId": "4ee5112f-8940-4a22-9c29-77efdf1df3b3"
                 }))
                 await ws.recv()
 
@@ -157,7 +162,8 @@ class TestInternalStatus(TestCase):
                         "room": {
                             "target": "message",
                             "customer": "1"
-                        }
+                        },
+                        "requestId": "71a518e6-ea5e-4d50-bc2c-6761470a22cf"
                     }))
 
                     await ws2.recv()
@@ -176,7 +182,6 @@ class TestInternalStatus(TestCase):
                     self.assertEqual(1, res['num_rooms'])
 
         asyncio.get_event_loop().run_until_complete(run())
-
 
     def test_auto_close_hubs_on_disconnect(self):
         set_bootstrap_response({
@@ -212,6 +217,4 @@ class TestInternalStatus(TestCase):
                 res = json.loads(res)
                 self.assertEqual(0, res['num_rooms'])
 
-
         asyncio.get_event_loop().run_until_complete(run())
-
