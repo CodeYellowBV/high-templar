@@ -58,7 +58,7 @@ class TestMessages(TestCase):
                 res = json.loads(res)
                 del res['requestId']
 
-                self.assertEquals(data, res)
+                self.assertEquals({'data': data, 'type': 'publish'}, res)
 
         asyncio.get_event_loop().run_until_complete(run())
 
@@ -112,12 +112,12 @@ class TestMessages(TestCase):
                 res = await ws.recv()
                 res = json.loads(res)
                 del res['requestId']
-                self.assertEquals(data, res)
+                self.assertEquals({'data': data, 'type': 'publish'}, res)
 
                 res = await ws2.recv()
                 res = json.loads(res)
                 del res['requestId']
-                self.assertEquals(data, res)
+                self.assertEquals({'data': data, 'type': 'publish'}, res)
 
         asyncio.get_event_loop().run_until_complete(run())
 
@@ -161,7 +161,7 @@ class TestMessages(TestCase):
                 res = json.loads(res)
                 del res['requestId']
 
-                self.assertEquals(data, res)
+                self.assertEquals({'data': data, 'type': 'publish'}, res)
 
         asyncio.get_event_loop().run_until_complete(run())
 
