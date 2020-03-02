@@ -76,3 +76,6 @@ class Connection:
         self.app.hub.register(self)
 
         await self.listen()
+
+    def __str__(self):
+        return "<Connection id={}>" .format(self.ID)
