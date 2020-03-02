@@ -30,7 +30,8 @@ class TestUnSubscribe(TestCase):
                     "room": {
                         "target": "message",
                         "customer": "1"
-                    }
+                    },
+                    "requestId": "1ba319b0-b720-4c24-991a-40be402ba64f"
                 }))
 
                 await ws.recv()
@@ -40,7 +41,8 @@ class TestUnSubscribe(TestCase):
                     "room": {
                         "target": "message",
                         "customer": "1"
-                    }
+                    },
+                    "requestId": "1ba319b0-b720-4c24-991a-40be402ba64f"
                 }))
 
                 res = await ws.recv()
@@ -66,7 +68,8 @@ class TestUnSubscribe(TestCase):
                     "room": {
                         "target": "message",
                         "customer": "1"
-                    }
+                    },
+                    "requestId": "1ba319b0-b720-4c24-991a-40be402ba64f"
                 }))
 
                 res = await ws.recv()

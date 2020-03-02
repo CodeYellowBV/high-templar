@@ -35,7 +35,8 @@ class TestMessages(TestCase):
                     "room": {
                         "target": "message",
                         "customer": "1"
-                    }
+                    },
+                    "requestId": "99364601-5c88-11ea-9e46-4b5f433089ab"
                 }))
                 await ws.recv()
 
@@ -56,9 +57,9 @@ class TestMessages(TestCase):
 
                 res = await ws.recv()
                 res = json.loads(res)
-                del res['requestId']
 
-                self.assertEquals({'data': data, 'type': 'publish'}, res)
+                self.assertEquals(
+                    {'data': data, 'type': 'publish', "requestId": "99364601-5c88-11ea-9e46-4b5f433089ab"}, res)
 
         asyncio.get_event_loop().run_until_complete(run())
 
@@ -81,7 +82,8 @@ class TestMessages(TestCase):
                     "room": {
                         "target": "message",
                         "customer": "1"
-                    }
+                    },
+                    "requestId": "99364601-5c88-11ea-9e46-4b5f433089ab"
                 }))
                 await ws.recv()
 
@@ -90,7 +92,8 @@ class TestMessages(TestCase):
                     "room": {
                         "target": "message",
                         "customer": "1"
-                    }
+                    },
+                    "requestId": "99364601-5c88-11ea-9e46-4b5f433089ac"
                 }))
                 await ws2.recv()
 
@@ -111,13 +114,13 @@ class TestMessages(TestCase):
 
                 res = await ws.recv()
                 res = json.loads(res)
-                del res['requestId']
-                self.assertEquals({'data': data, 'type': 'publish'}, res)
+                self.assertEquals(
+                    {'data': data, 'type': 'publish', "requestId": "99364601-5c88-11ea-9e46-4b5f433089ab"}, res)
 
                 res = await ws2.recv()
                 res = json.loads(res)
-                del res['requestId']
-                self.assertEquals({'data': data, 'type': 'publish'}, res)
+                self.assertEquals(
+                    {'data': data, 'type': 'publish', "requestId": "99364601-5c88-11ea-9e46-4b5f433089ac"}, res)
 
         asyncio.get_event_loop().run_until_complete(run())
 
@@ -138,7 +141,8 @@ class TestMessages(TestCase):
                     "room": {
                         "target": "message",
                         "customer": "*"
-                    }
+                    },
+                    "requestId": "99364601-5c88-11ea-9e46-4b5f433089ab"
                 }))
                 await ws.recv()
 
@@ -159,9 +163,9 @@ class TestMessages(TestCase):
 
                 res = await ws.recv()
                 res = json.loads(res)
-                del res['requestId']
 
-                self.assertEquals({'data': data, 'type': 'publish'}, res)
+                self.assertEquals(
+                    {'data': data, 'type': 'publish', "requestId": "99364601-5c88-11ea-9e46-4b5f433089ab"}, res)
 
         asyncio.get_event_loop().run_until_complete(run())
 
@@ -182,7 +186,8 @@ class TestMessages(TestCase):
                     "room": {
                         "target": "message",
                         "customer": "2"
-                    }
+                    },
+                    "requestId": "99364601-5c88-11ea-9e46-4b5f433089ab"
                 }))
                 await ws.recv()
 

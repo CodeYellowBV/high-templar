@@ -30,7 +30,6 @@ class Connection:
         :param message:
         :return:
         """
-        message['requestId'] = self.ID
         return await self.send_raw(json.dumps(message))
 
     async def send_raw(self, message: str):
