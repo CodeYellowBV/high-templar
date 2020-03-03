@@ -27,7 +27,7 @@ class HTQuart(Quart):
     async def status(self):
         HTQuart.IS_STARTED = True
         while True:
-            await asyncio.sleep(5)
+            await asyncio.sleep(60)
             self.hub.status()
 
     async def background(self):
