@@ -85,6 +85,7 @@ class HTQuart(Quart):
         )
 
 
+
 def create_app(settings=None):
     app = HTQuart(__name__)
     app.hub = Hub(app)
@@ -92,24 +93,24 @@ def create_app(settings=None):
     if settings:
         app.config.from_object(settings)
 
-    # For now, just use the binderadapter
-
     @app.websocket('/ws/')
     async def open_socket():
         # Get out of the global context, and get the actual websocket connection, such that we can understand
         # what is going
         ws = websocket._get_current_object()
-        connection = Connection(BinderAdapter(app), app, ws)
-        notify_future = app.notify_connect(connection)
-        try:
-            await asyncio.gather(
-                connection.run(),
-                notify_future
-            )
-        finally:
-            app.logger.debug("Closed socket, deregister!: {}".format(connection.ID))
-            app.hub.deregister(connection)
-            await app.notify_disconnect(connection)
+        # For now, just use the binderadapter
+        async with BinderAdapter(app) as adapter:
+            connection = Connection(adapter, app, ws)
+            notify_future = app.notify_connect(connection)
+            try:
+                await asyncio.gather(
+                    connection.run(),
+                    notify_future
+                )
+            finally:
+                app.logger.debug("Closed socket, deregister!: {}".format(connection.ID))
+                app.hub.deregister(connection)
+                await app.notify_disconnect(connection)
 
     # @app.route('/trigger/', methods=['POST'])
     # async def handle_trigger():
