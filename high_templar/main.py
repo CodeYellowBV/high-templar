@@ -27,7 +27,7 @@ class HTQuart(Quart):
     async def status(self):
         HTQuart.IS_STARTED = True
         while True:
-            await asyncio.sleep(60)
+            await asyncio.sleep(5)
             self.hub.status()
 
     async def background(self):
@@ -116,5 +116,12 @@ def create_app(settings=None):
     # async def handle_trigger():
     #     data = json.loads(request.data.decode())
     #     return app.hub.handle_trigger(data)
+
+    @app.on_connect
+    @app.on_ping
+    async def notify_online(connection):
+        connection.app.logger.debug("Notify online")
+        connection.backend_adapter.base_url= 'http://wiremock:8080'
+        await connection.backend_adapter.post('/user/notify_online/')
 
     return app

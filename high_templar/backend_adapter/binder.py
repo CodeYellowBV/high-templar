@@ -40,7 +40,7 @@ class BinderAdapter(BackendAdapter, ClientSession):
         self.app.logger.debug(websocket.args)
         self.app.logger.debug(websocket.args.get('session_token'))
 
-        response = await self.get('bootstrap/'.format(self.base_url))
+        response = await self.get('bootstrap/')
 
         if response.status != 200:
             raise NoBackendConnectionException()
