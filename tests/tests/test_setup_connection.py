@@ -83,7 +83,7 @@ class TestSetupConnection(TestCase):
             async with websockets.connect(WS_URI) as ws:
                 allowed_rooms = await ws.recv()
                 await ws.send('ping')
-                self.assertEquals('pong', await ws.recv())
+                self.assertEqual('pong', await ws.recv())
 
         asyncio.get_event_loop().run_until_complete(run())
 

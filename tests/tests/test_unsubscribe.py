@@ -47,7 +47,7 @@ class TestUnSubscribe(TestCase):
 
                 res = await ws.recv()
                 res = json.loads(res)
-                self.assertEquals("success", res['code'])
+                self.assertEqual("success", res['code'])
 
         asyncio.get_event_loop().run_until_complete(run())
 
@@ -74,7 +74,7 @@ class TestUnSubscribe(TestCase):
 
                 res = await ws.recv()
                 res = json.loads(res)
-                self.assertEquals("error", res['code'])
-                self.assertEquals("not-subscribed", res['message'])
+                self.assertEqual("error", res['code'])
+                self.assertEqual("not-subscribed", res['message'])
 
         asyncio.get_event_loop().run_until_complete(run())

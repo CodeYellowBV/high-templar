@@ -37,7 +37,7 @@ class TestSubscribe(TestCase):
                 res = await ws.recv()
 
                 res = json.loads(res)
-                self.assertEquals("success", res['code'])
+                self.assertEqual("success", res['code'])
 
         asyncio.get_event_loop().run_until_complete(run())
 
@@ -65,7 +65,7 @@ class TestSubscribe(TestCase):
                 res = await ws.recv()
 
                 res = json.loads(res)
-                self.assertEquals("error", res['code'])
-                self.assertEquals("room-not-found", res['message'])
+                self.assertEqual("error", res['code'])
+                self.assertEqual("room-not-found", res['message'])
 
         asyncio.get_event_loop().run_until_complete(run())
