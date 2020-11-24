@@ -7,9 +7,7 @@ python:
 cache:
   pip: true
 install:
-  - ./setup.py install
-  - pip install greenlet codecov coverage gevent
+  - docker-compose up
+  - pip install -Ur tests/requirements.txt
 script:
-  - coverage run --source="high_templar" --concurrency="greenlet" setup.py test
-after_success:
-  - codecov
+  - cd tests && pytest
