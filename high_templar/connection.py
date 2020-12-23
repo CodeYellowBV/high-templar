@@ -67,6 +67,7 @@ class Connection:
                 await handle_message(self, message)
         except asyncio.TimeoutError:
             # Too long without a response, close the connection
+            self.app.logger.debug("{} is inactive for too long. Terminating connection".format(self.ID))
             pass
 
     async def run(self):

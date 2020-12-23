@@ -117,11 +117,11 @@ def create_app(settings=None):
     #     data = json.loads(request.data.decode())
     #     return app.hub.handle_trigger(data)
 
-    @app.on_connect
-    @app.on_ping
-    async def notify_online(connection):
-        connection.app.logger.debug("Notify online")
-        connection.backend_adapter.base_url= 'http://wiremock:8080'
-        await connection.backend_adapter.post('/user/notify_online/')
+    # @app.on_connect
+    # @app.on_ping
+    # async def notify_online(connection):
+    #     connection.app.logger.debug("Notify online")
+    #     connection.backend_adapter.base_url= 'http://wiremock:8080'
+    #     await connection.backend_adapter.post('/user/notify_online/')
 
     return app
