@@ -58,10 +58,16 @@ class Connection:
         Listen to actions from the user, and handle them
         :return:
         """
-        while True:
-            message = await self.websocket.receive()
-            self.app.logger.debug("{} received message: {}".format(self.ID, message))
-            await handle_message(self, message)
+        try:
+            while True:
+                # Add a timeout to the connection. If we do not receive a ping for a while, close the connection
+                # This makes sure that connections which are not properly closed are cleaned up
+                message = await asyncio.wait_for(self.websocket.receive(), 300)
+                self.app.logger.debug("{} received message: {}".format(self.ID, message))
+                await handle_message(self, message)
+        except asyncio.TimeoutError:
+            # Too long without a response, close the connection
+            pass
 
     async def run(self):
         # First check if we are authenticated
