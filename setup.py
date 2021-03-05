@@ -40,7 +40,7 @@ setup(
         'aio-pika==6.4.1',
         'hypercorn >= 0.9.0',
         'quart == 0.11.2',
-        'aiohttp == 3.6.2',
+        'aiohttp >= 3.6.2',
         'aiohttp_requests>=0.1.2',
         'frozendict==1.2',
     ],
