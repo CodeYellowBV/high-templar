@@ -83,6 +83,17 @@ class Authentication:
     def __str__(self):
         return "Authentication: Allowed rooms {}".format(json.dumps(self.json_serializable()))
 
+    """
+    TODO:
+    
+    this currently is a O(N * M) algorithm, with N = amount of permission and M = #keys in permission
+    
+    This can be optimized further with making a tree of the keys, with hashsets in the nodes. That would allow to traverse
+    the tree in O(M * 1) = O(M) time, 
+    
+    This only makes sense if the amount of has_permission checks outweights the amount of times connected
+    
+    """
     def has_permission(self, permission: Permission) -> bool:
         """
         Check if the user is allowed to subscribe on a room, based upon the allowed rooms
