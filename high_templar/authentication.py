@@ -35,11 +35,9 @@ class Permission(frozendict):
                 continue
 
             if self[key] == '*':
-                logger.error('HIer 1')
                 return False
 
             if self[key] != other[key]:
-                logger.error('HIer 2')
                 return False
             has_diff = True
 
@@ -77,7 +75,7 @@ class Permission(frozendict):
 
 class Authentication:
     def __init__(self, allowed_rooms: List[Permission]):
-        self.allowed_rooms = allowed_rooms
+        self.allowed_rooms = set(allowed_rooms)
 
     def json_serializable(self):
         return list(map(lambda r: dict(r), self.allowed_rooms))
@@ -92,9 +90,12 @@ class Authentication:
         :param room:
         :return:
         """
+
+        # if permission in self.allowed_rooms:
+        #     return True
+
         for p in self.allowed_rooms:
             # Check if we have at least one permission that is bigger than the request permission
-            logger.error(f">>> {p} {permission}, {p >= permission}")
             if p >= permission:
                 return True
 
