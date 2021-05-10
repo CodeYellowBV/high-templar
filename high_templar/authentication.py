@@ -91,8 +91,8 @@ class Authentication:
         :return:
         """
 
-        # if permission in self.allowed_rooms:
-        #     return True
+        if permission in self.allowed_rooms:
+            return True
 
         for p in self.allowed_rooms:
             # Check if we have at least one permission that is bigger than the request permission
