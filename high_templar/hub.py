@@ -6,7 +6,10 @@ from high_templar.connection import Connection
 from high_templar.authentication import Permission
 import json
 from high_templar.subscription import Subscription
+from quart import Quart
+import logging
 
+logger = logging.getLogger()
 
 class NoPermissionException(Exception):
     pass
@@ -27,8 +30,9 @@ class Room:
     In the case a view_action.own, all subscriptions would belong to the same connection
     """
 
-    def __init__(self, permission: Permission):
+    def __init__(self, app: Quart, permission: Permission):
         # mapping between (connection.Id,  => connection
+        self.app = app
         self.permission = permission
         self.subscriptions = set()
 
@@ -41,6 +45,7 @@ class Room:
         :param subscription:
         :return: Should the room be removed
         """
+        self.app.logger.debug(f'room.remove_subscription: {subscription}')
         if subscription not in self.subscriptions:
             raise NotSubscribedException()
 
@@ -90,11 +95,12 @@ class Hub:
 
     def deregister(self, connection: Connection):
         # Unsubscribe from all rooms
-        connection.app.logger.debug("HUB: Deregistering {}.".format(connection))
+        connection.app.logger.debug(f"HUB: Deregistering {connection.ID}")
         subscriptions = list(self.subscriptions.get(connection, []))
+        connection.app.logger.debug(f"HUB: Deregistering subscriptions {str(subscriptions)}")
         for subscription in subscriptions:
             try:
-                self.unsubscribe(connection, subscription)
+                self.unsubscribe(subscription)
             except NotSubscribedException:
                 pass
 
@@ -117,10 +123,12 @@ class Hub:
         if subscription.permission in self.rooms:
             room = self.rooms[subscription.permission]
         else:
-            room = Room(subscription.permission)
+            room = Room(self.app, subscription.permission)
             self.app.logger.debug("HUB: Created room {}".format(room.permission))
             self.rooms[subscription.permission] = room
 
+
+        self.subscriptions[subscription.connection].add(subscription)
         room.add_subscription(subscription)
 
     def unsubscribe(self, subscription: Subscription):
