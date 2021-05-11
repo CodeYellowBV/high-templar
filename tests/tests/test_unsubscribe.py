@@ -38,10 +38,6 @@ class TestUnSubscribe(TestCase):
 
                 await ws.send(json.dumps({
                     "type": "unsubscribe",
-                    "room": {
-                        "target": "message",
-                        "customer": "1"
-                    },
                     "requestId": "1ba319b0-b720-4c24-991a-40be402ba64f"
                 }))
 

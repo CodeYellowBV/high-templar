@@ -1,31 +1,22 @@
-from high_templar.authentication import Permission
-from high_templar.subscription import Subscription
-
-
 async def unsubscribe(connection, message):
-    from high_templar.hub import NotSubscribedException
-    permission = Permission(message['room'])
-
+    """
+    Unsubscribe by finding the subscription based on message.requestId.
+    """
     if 'requestId' not in message:
         return await connection.send({
-            "code": "error",
-            "message": "no-request-id"
+            'code': 'error',
+            'message': 'no-request-id'
         })
 
-    try:
-        connection.app.hub.unsubscribe(
-            Subscription(
-                connection=connection,
-                permission=permission,
-                request_id=message['requestId']
-            )
-        )
-    except NotSubscribedException:
+    for subscription in connection.app.hub.subscriptions[connection]:
+        if subscription.request_id == message['requestId']:
+            connection.app.hub.unsubscribe(subscription)
+            await connection.send({
+                'code': 'success',
+            })
+            break
+    else:
         return await connection.send({
-            "code": "error",
-            "message": "not-subscribed"
+            'code': 'error',
+            'message': 'not-subscribed'
         })
-
-    await connection.send({
-        'code': 'success',
-    })
