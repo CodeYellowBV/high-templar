@@ -9,6 +9,9 @@ from high_templar.rabbitmq import run as run_rabbitmq
 
 from high_templar.hub import Hub
 
+import logging
+
+logger = logging.getLogger()
 
 class HTQuart(Quart):
     """

@@ -194,10 +194,11 @@ class TestInternalStatus(TestCase):
         async def run():
             async with websockets.connect(WS_URI) as ws:
                 await ws.recv()
-                status = await ws.send('{"type": "status"}')
+                await ws.send('{"type": "status"}')
                 res = await ws.recv()
                 res = json.loads(res)
                 self.assertEqual(0, res['num_rooms'])
+                self.assertEqual(1, res['open_connections'])
 
                 async with websockets.connect(WS_URI) as ws2:
                     await ws2.recv()
@@ -207,14 +208,23 @@ class TestInternalStatus(TestCase):
                         "room": {
                             "target": "message",
                             "customer": "1"
-                        }
+                        },
+                        "requestId": "123"
                     }))
 
                     await ws2.recv()
 
-                status = await ws.send('{"type": "status"}')
+                    await ws.send('{"type": "status"}')
+                    res = await ws.recv()
+                    res = json.loads(res)
+
+                    self.assertEqual(1, res['num_rooms'])
+                    self.assertEqual(2, res['open_connections'])
+
+                await ws.send('{"type": "status"}')
                 res = await ws.recv()
                 res = json.loads(res)
                 self.assertEqual(0, res['num_rooms'])
+                self.assertEqual(1, res['open_connections'])
 
         asyncio.get_event_loop().run_until_complete(run())
