@@ -97,6 +97,23 @@ Response:
 
     pong
 
+Tests
+=======
+
+
+First install dependencies locally:
+```
+pip3 install -Ur requirements.txt
+pip3 install -Ur tests/requirements.txt
+```
+
+Run docker:
+`docker-compose up`
+
+Run all test: `pytest`
+Run specific test: `pytest -v tests/tests/test_unsubscribe.py::TestUnSubscribe::test_unsubscribe_to_room`
+
+
 Origin
 =======
 
@@ -109,3 +126,4 @@ This repository is based on archon_. Archon is a framework for creating full fle
 .. _build_status: https://travis-ci.org/CodeYellowBV/high-templar
 .. |code_coverage| image:: https://codecov.io/gh/CodeYellowBV/high-templar/branch/master/graph/badge.svg
 .. _code_coverage: https://codecov.io/gh/CodeYellowBV/high-templar
+
