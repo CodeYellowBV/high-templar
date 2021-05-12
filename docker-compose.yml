@@ -33,3 +33,7 @@ services:
       - 8000:8000
       - 8001:8001
 
+  tester:
+    build:
+      context: ./
+      dockerfile: docker/tester/Dockerfile
