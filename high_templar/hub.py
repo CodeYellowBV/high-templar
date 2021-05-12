@@ -120,26 +120,27 @@ class Hub:
         if not subscription.connection.authentication.has_permission(subscription.permission):
             raise NoPermissionException()
 
-        if subscription.permission in self.rooms:
-            room = self.rooms[subscription.permission]
+        if subscription.permission.hash() in self.rooms:
+            room = self.rooms[subscription.permission.hash()]
+            self.app.logger.debug("HUB: Reuse room {}".format(room.permission))
         else:
             room = Room(self.app, subscription.permission)
             self.app.logger.debug("HUB: Created room {}".format(room.permission))
-            self.rooms[subscription.permission] = room
+            self.rooms[subscription.permission.hash()] = room
 
 
         self.subscriptions[subscription.connection].add(subscription)
         room.add_subscription(subscription)
 
     def unsubscribe(self, subscription: Subscription):
-        if subscription.permission not in self.rooms:
+        if subscription.permission.hash() not in self.rooms:
             raise NotSubscribedException()
-        room = self.rooms[subscription.permission]
+        room = self.rooms[subscription.permission.hash()]
 
         room_empty = room.remove_subscription(subscription)
         if room_empty:
             self.app.logger.debug("HUB: Deleted room {}".format(room.permission))
-            del self.rooms[room.permission]
+            del self.rooms[room.permission.hash()]
         else:
             self.app.logger.debug(
                 "HUB: Kept room {}. Alive subscriptions: {}".format(room.permission, len(room.subscriptions)))
@@ -194,19 +195,6 @@ class Hub:
             )
             data = content['data']
 
-            rooms_to_dispatch_to = []
-            subscriptions_to_dispatch_to = []
-
-            # Get all the rooms for which this message may be important
-            for room in self.rooms.values():
-                # Check all the rooms for those which have a permission to this message, and (maybe) nmore
-                for permission in message_permissions:
-                    self.app.logger.debug("{} {}".format(type(permission), type(room.subscriptions)))
-                    if permission <= room.permission:
-                        rooms_to_dispatch_to.append(room)
-                        subscriptions_to_dispatch_to += list(room.subscriptions)
-                        break
-
             # Send the message to all connections as a seperate event
             send_data_futures = []
 
@@ -225,15 +213,13 @@ class Hub:
                     connection.app.hub.hub_status.ws_messages_send_error += 1
                     connection.app.logger.warning("Error when sending message: {}".format(e))
 
-            self.app.logger.debug("Dispatch message to {} subscriptions".format(len(subscriptions_to_dispatch_to)))
-            self.app.logger.debug("Sending message to {}".format(subscriptions_to_dispatch_to))
-
-            for subscription in subscriptions_to_dispatch_to:
-                try:
-                    send_data_futures.append(send_message(subscription, data))
-                except KeyError:
-                    # Happens if the connection with connection_id has been disconnected.
-                    pass
+            for permission in message_permissions:
+                for subscription in self.rooms[permission.hash()].subscriptions:
+                    try:
+                        send_data_futures.append(send_message(subscription, data))
+                    except KeyError:
+                        # Happens if the connection with connection_id has been disconnected.
+                        pass
 
             await asyncio.gather(*send_data_futures)
 

@@ -72,6 +72,27 @@ class Permission(frozendict):
     def __le__(self, other):
         return self == other or self < other
 
+    # Room names are dict.
+    # Every keyval pair is a scope of the permission.
+    # IE:
+    # { 'zoo': 1, 'animal_type': 'penguin'}
+    # Is a room where publishes about the penguins in zoo 1 appear.
+    #
+    # The backend needs to dictate which rooms a user can be in,
+    # and the frontend needs to programmatically define the room to subscribe to.
+    #
+    # We hash the dicts so that
+    # {'foo': True, 'bar': True} is the same room as {'bar': True, 'foo': True}
+    # and so we can still check if a room exists
+    def hash(self):
+        unfrozen = {}
+
+        for key in self.keys():
+            unfrozen[key] = self[key]
+
+        return json.dumps(unfrozen, sort_keys=True)
+
+
 
 class Authentication:
     def __init__(self, allowed_rooms: List[Permission]):
@@ -85,14 +106,14 @@ class Authentication:
 
     """
     TODO:
-    
+
     this currently is a O(N * M) algorithm, with N = amount of permission and M = #keys in permission
-    
+
     This can be optimized further with making a tree of the keys, with hashsets in the nodes. That would allow to traverse
-    the tree in O(M * 1) = O(M) time, 
-    
+    the tree in O(M * 1) = O(M) time,
+
     This only makes sense if the amount of has_permission checks outweights the amount of times connected
-    
+
     """
     def has_permission(self, permission: Permission) -> bool:
         """
