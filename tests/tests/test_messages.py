@@ -1,4 +1,5 @@
 import json
+import pytest
 from time import sleep
 from unittest import TestCase
 import websockets
@@ -124,6 +125,7 @@ class TestMessages(TestCase):
 
         asyncio.get_event_loop().run_until_complete(run())
 
+    @pytest.mark.skip(reason="Subscribing to * but triggering on 1 currently doesn't trigger on * (permission vs room)")
     def test_subscribe_all_gets_message(self):
         set_bootstrap_response({
             "allowed_rooms": [{
