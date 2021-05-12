@@ -7,7 +7,7 @@ import json
 
 
 def set_bootstrap_response(data):
-    Config.base_url = 'http://127.0.0.1:8080/__admin'
+    Config.base_url = 'http://wiremock:8080/__admin'
 
     if data is None:
         mapping = Mapping(

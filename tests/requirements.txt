@@ -3,3 +3,4 @@ requests2==2.16.0
 wiremock==1.2.0
 pytest==6.1.1
 frozendict==1.2.0
+pika==1.2.0
