@@ -25,7 +25,17 @@ Installation
 
 .. code:: bash
 
+    pip install -Ur requirements.txt
     pip install high-templar
+
+    # Install rabbitmq and create a user.
+    apt install rabbitmq-server
+    rabbitmqctl add_user rabbitmq rabbitmq
+    rabbitmqctl set_user_tags rabbitmq administrator
+    rabbitmqctl set_permissions -p / rabbitmq ".*" ".*" ".*"
+
+    # Take a look at `install` folder for examples for systemd.
+
 
 Motivation
 ==============
