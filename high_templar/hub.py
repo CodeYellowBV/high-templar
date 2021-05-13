@@ -213,13 +213,15 @@ class Hub:
                     connection.app.hub.hub_status.ws_messages_send_error += 1
                     connection.app.logger.warning("Error when sending message: {}".format(e))
 
+
             for permission in message_permissions:
-                for subscription in self.rooms[permission.hash()].subscriptions:
-                    try:
-                        send_data_futures.append(send_message(subscription, data))
-                    except KeyError:
-                        # Happens if the connection with connection_id has been disconnected.
-                        pass
+                if permission.hash() in self.rooms:
+                    for subscription in self.rooms[permission.hash()].subscriptions:
+                        try:
+                            send_data_futures.append(send_message(subscription, data))
+                        except KeyError:
+                            # Happens if the connection with connection_id has been disconnected.
+                            pass
 
             await asyncio.gather(*send_data_futures)
 
