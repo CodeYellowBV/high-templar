@@ -64,6 +64,59 @@ class TestMessages(TestCase):
 
         asyncio.get_event_loop().run_until_complete(run())
 
+    def test_simple_subscribe_gets_message_when_message_is_triggered_on_multiple_rooms(self):
+        """
+        Simple test for setting up a websocket connection
+        """
+
+        set_bootstrap_response({
+            "allowed_rooms": [{
+                "target": "message",
+                "customer": "1"
+            }]
+        })
+
+        async def run():
+            async with websockets.connect(WS_URI) as ws:
+                await ws.recv()
+
+                await ws.send(json.dumps({
+                    "type": "subscribe",
+                    "room": {
+                        "target": "message",
+                        "customer": "1"
+                    },
+                    "requestId": "99364601-5c88-11ea-9e46-4b5f433089ab"
+                }))
+                await ws.recv()
+
+                data = {
+                    "foo": "bar"
+                }
+
+                send_trigger({
+                    "rooms": [
+                        {
+                            "target": "message",
+                            "customer": "1"
+                        },
+                        {
+                            "target": "room-without-subscribers",
+                            "customer": "so-an-empty-or-non-existent-room"
+                        }
+
+                    ],
+                    "data": data
+                })
+
+                res = await ws.recv()
+                res = json.loads(res)
+
+                self.assertEqual(
+                    {'data': data, 'type': 'publish', "requestId": "99364601-5c88-11ea-9e46-4b5f433089ab"}, res)
+
+        asyncio.get_event_loop().run_until_complete(run())
+
     def test_two_websocket_connections(self):
         set_bootstrap_response({
             "allowed_rooms": [{
