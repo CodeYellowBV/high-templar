@@ -187,7 +187,7 @@ class Hub:
     async def dispatch_message(self, message):
         self.hub_status.rabbitmq_messages_received += 1
         try:
-            self.app.logger.info("Dispatch message: {}".format(message))
+            self.app.logger.debug("Dispatch message: {}".format(message))
             content = json.loads(message)
 
             message_permissions = list(

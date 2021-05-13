@@ -54,7 +54,7 @@ class BinderAdapter(BackendAdapter, ClientSession):
                 map(lambda x: Permission(x), content.get('allowed_rooms', []))
             ))
         except (AttributeError, ValueError):
-            self.app.logger.info("Binder: could not understand permissions {}".format(content.get('allowed_rooms')))
+            self.app.logger.debug("Binder: could not understand permissions {}".format(content.get('allowed_rooms')))
             raise UnparsableBackendPermissionsException()
 
     async def _request(self, method, url, *, headers={}, **kwargs):
