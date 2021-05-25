@@ -110,19 +110,14 @@ Response:
 Tests
 =======
 
+Run high templar first:
+`./run`
 
-First install dependencies locally:
-```
-pip3 install -Ur requirements.txt
-pip3 install -Ur tests/requirements.txt
-```
+After it is started, you can run all tests:
+`./test`
 
-Run docker:
-`docker-compose up`
-
-Run all test: `pytest`
-Run specific test: `pytest -v tests/tests/test_unsubscribe.py::TestUnSubscribe::test_unsubscribe_to_room`
-
+Or run a specific test:
+`./test -v tests/tests/test_unsubscribe.py::TestUnSubscribe::test_unsubscribe_to_room`
 
 Origin
 =======
