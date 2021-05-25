@@ -27,21 +27,12 @@ class HTQuart(Quart):
         self.ping_hooks = []
         self.disconnect_hooks = []
 
-    async def status(self):
-        HTQuart.IS_STARTED = True
-        while True:
-            await asyncio.sleep(5)
-            self.hub.status()
-
     async def background(self):
         if HTQuart.IS_STARTED:
             return
         HTQuart.IS_STARTED = True
 
-        return await asyncio.gather(
-            run_rabbitmq(self),
-            self.status()
-        )
+        return await run_rabbitmq(self)
 
     async def __call__(self, *args, **kwargs):
         """
