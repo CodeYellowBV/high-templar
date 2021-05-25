@@ -21,7 +21,5 @@ COPY tests/requirements.txt /requirements.tests.txt
 RUN pip3 -q install -Ur /requirements.txt
 RUN pip3 -q install -Ur /requirements.tests.txt
 
-COPY . /code
-
 # run app
-CMD ["./tests/run.py"]
+ENTRYPOINT ["pytest"]
