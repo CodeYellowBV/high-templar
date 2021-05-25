@@ -36,6 +36,7 @@ class TestUnSubscribe(TestCase):
 
                 await ws.recv()
 
+                # First time unsubscribe should work.
                 await ws.send(json.dumps({
                     "type": "unsubscribe",
                     "requestId": "1ba319b0-b720-4c24-991a-40be402ba64f"
@@ -44,6 +45,18 @@ class TestUnSubscribe(TestCase):
                 res = await ws.recv()
                 res = json.loads(res)
                 self.assertEqual("success", res['code'])
+
+                # Second unsubscribe should give an error.
+                await ws.send(json.dumps({
+                    "type": "unsubscribe",
+                    "requestId": "1ba319b0-b720-4c24-991a-40be402ba64f"
+                }))
+                res = await ws.recv()
+                res = json.loads(res)
+                self.assertEqual({
+                    'code': 'error',
+                    'message': 'not-subscribed'
+                }, res)
 
         asyncio.get_event_loop().run_until_complete(run())
 
