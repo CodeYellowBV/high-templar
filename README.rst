@@ -56,6 +56,15 @@ Architecture
 The Rabbitmq rewrite made it possible
 
 
+2 concepts are fundamental:
+
+1. Connection: a single websocket bi-directional data pipe connection.
+2. Room: an authenticated place where data is send from the server.
+
+
+Normally only 1 connection is created during the entire session, but many, many rooms are subscribed to using this single connection. When a connection is created, the server responds with the allowed rooms for that user. A room is identified by a hash, and upon subscribing the client needs to specify a unique `requestId` that identifies the subscription to that room. That `requestId` can be used to match messages send from the server to a specific room. It is also used to unsubscribe from a room.
+
+
 
 
 
@@ -76,7 +85,10 @@ Response:
 
     {
         "is_authenticated": True,
-        "allowed_rooms": []
+        "allowed_rooms": [{
+            "target": "message",
+            "customer": "1"
+        }]
     }
 
 When creating a connection, and authentication can not be done:
@@ -88,6 +100,142 @@ Response:
     {
         "is_authenticated": False
     }
+
+
+Subscribing to a room
+------------------------
+
+Request:
+
+.. code:: json
+    {
+        "type": "subscribe",
+        "room": {
+            "target": "message",
+            "customer": "1"
+        },
+        "requestId": "1"
+    }
+
+Response when you have permission:
+
+.. code:: json
+    { "code": "success" }
+
+
+Response when you don't have permission or the room doesn't exist:
+
+.. code:: json
+    {
+        "code": "error",
+        "message": "room-not-found"
+    }
+
+
+TODO: document unsubscribe
+
+
+Room permissions
+------------------------
+
+The initial message send from the server contains an `allowed_rooms` key. This `allowed_rooms` key determines which rooms which the client can subscribe to. Upon subscribing, the server checks if the client is allowed into the room, but once connected no futher permission checking is done. An example server response upon creating a connection:
+
+
+.. code:: json
+    {
+        "is_authenticated": True,
+        "allowed_rooms": [{
+            "room": "user-login",
+            "department": "finance"
+        }, {
+            "room": "user-logout",
+            "department": "finance"
+        }, {
+            "target": "chat-create",
+            "customer": "*"
+        }, {
+            "target": "chat-update",
+            "customer": "*"
+        }]
+    }
+
+
+The key / value pairs have no meaning, other then identifying a room. An exception is the special `*` character, which means that anything will match in place of that character. For the response above, it means the client can connect to the 4 rooms described in `allowed_rooms`, but also to:
+
+.. code:: json
+    {
+        "type": "subscribe",
+        "room": {
+            "target": "chat-create",
+            "customer": "*"
+        },
+        "requestId": "1"
+    }
+
+.. code:: json
+    {
+        "type": "subscribe",
+        "room": {
+            "target": "chat-create",
+            "customer": "1"
+        },
+        "requestId": "2"
+    }
+
+.. code:: json
+    {
+        "type": "subscribe",
+        "room": {
+            "target": "chat-create",
+            "customer": "2"
+        },
+        "requestId": "3"
+    }
+
+
+Sending data to a room
+------------------------
+
+
+To send data to a room, send a POST request to the server:
+
+.. code:: json
+    {
+        [
+            {
+                "target": "chat-create",
+                "customer": "*"
+            },
+            {
+                "target": "chat-create",
+                "customer": "1"
+            },
+            {
+                "target": "chat-create",
+                "customer": "2"
+            }
+        ],
+        "data": "Example text body"
+    }
+
+
+Using the `*`, we can cut 2 rooms. So this is the exactly the same as:
+
+.. code:: json
+    {
+        [
+            {
+                "target": "chat-create",
+                "customer": "*"
+            }
+        ],
+        "data": "Example text body"
+    }
+
+TODO: Implement this
+TODO: Add test for trigger http endpoint
+
+
 
 Ping pong
 ------------------------
