@@ -1,5 +1,6 @@
 codecov
 coverage
+flake8
 Flask
 Flask-Sockets
 gevent
