@@ -66,7 +66,8 @@ jobs:
       - name: Install requirements
         run: |
           python -m venv .venv
-          .venv/bin/pip install -qr ci-requirements.txt django==${{ matrix.django-version }}
+          .venv/bin/pip install -qr requirements.txt django==${{ matrix.django-version }}
+          .venv/bin/pip install -qr tests/requirements.txt django==${{ matrix.django-version }}
         if: steps.cache-venv.outputs.cache-hit != 'true'
 
       - name: Run linting
@@ -85,12 +86,13 @@ jobs:
 #      - name: Setup Containers
 #        run: ./run
 
-      - name: Run tests
+      - name: Run tests with pytest
         run: |
-          .venv/bin/coverage run setup.py test
-        env:
-#          BINDER_TEST_MYSQL: ${{ matrix.database-engine == 'mysql' && 1 || 0 }}
-          CY_RUNNING_INSIDE_CI: 1
+          pytest
+#          .venv/bin/coverage run setup.py test
+#        env:
+##          BINDER_TEST_MYSQL: ${{ matrix.database-engine == 'mysql' && 1 || 0 }}
+#          CY_RUNNING_INSIDE_CI: 1
 
       - name: Upload coverage report
         uses: codecov/codecov-action@v1
