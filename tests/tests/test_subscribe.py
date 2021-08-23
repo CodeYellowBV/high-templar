@@ -99,6 +99,6 @@ class TestSubscribe(TestCase):
                 res = await ws.recv()
 
                 res = json.loads(res)
-                self.assertEqual("success", res['code'])
+                self.assertEqual("failure", res['code'])
 
         asyncio.get_event_loop().run_until_complete(run())
