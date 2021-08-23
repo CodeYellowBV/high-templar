@@ -72,7 +72,7 @@ jobs:
       #        if: steps.cache-venv.outputs.cache-hit != 'true'
 
       - name: Run linting
-        run: .venv/bin/flake8 high_templar
+        run: flake8 high_templar
 
 #      - name: Prepare postgres database
 #        run: |
