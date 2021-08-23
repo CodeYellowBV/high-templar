@@ -85,7 +85,9 @@ jobs:
 #        if: matrix.database-engine == 'mysql'
 
       - name: Setup Containers
-        run: docker-compose --build up rabbitmq backend wiremock nginx
+        run: |
+        docker-compose build rabbitmq backend wiremock nginx
+        docker-compose up rabbitmq backend wiremock nginx
 
       - name: Run tests with pytest
         run: |
