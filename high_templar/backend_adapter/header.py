@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from werkzeug.datastructures import Headers
+# from werkzeug.datastructures import Headers
 from werkzeug.http import parse_cookie
 
 
