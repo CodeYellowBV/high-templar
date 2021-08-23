@@ -12,6 +12,14 @@ jobs:
         django-version: ["2.1.1", "3.1.4"]
 #        database-engine: ["postgres", "mysql"]
 
+
+#############################################
+    # A lot of optimization still needs to be done such as only building the
+    # containers once and using the container for the flake8 test
+    # But it is good enough for now
+#############################################
+
+
 #    services:
 #      rabbitmq:
 #        image: rabbitmq:management
@@ -72,18 +80,6 @@ jobs:
       - name: Run linting
         run: .venv/bin/flake8 high_templar
 
-
-      #      - name: Prepare postgres database
-#        run: |
-#          psql -c 'CREATE DATABASE "binder-test";' -h localhost -U postgres
-#        if: matrix.database-engine == 'postgres'
-#
-#      - name: Prepare mysql database
-#        run: |
-#          mysql --protocol=TCP -h localhost -u root -prootpassword -e 'CREATE DATABASE `binder-test`;'
-#          mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql --protocol=TCP -h localhost -u root -prootpassword mysql
-#        if: matrix.database-engine == 'mysql'
-
       - name: Setup Containers
         run: |
           docker-compose build rabbitmq backend wiremock nginx
@@ -92,11 +88,6 @@ jobs:
       - name: Run tests with pytest
         run: |
           docker-compose run tester
-#          .venv/bin/coverage run pytest
-#          .venv/bin/coverage run setup.py test
-#        env:
-##          BINDER_TEST_MYSQL: ${{ matrix.database-engine == 'mysql' && 1 || 0 }}
-#          CY_RUNNING_INSIDE_CI: 1
 
       - name: Upload coverage report
         uses: codecov/codecov-action@v1
