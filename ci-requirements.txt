@@ -4,7 +4,6 @@ aio-pika
 hypercorn
 codecov
 coverage
-ctypes
 flake8
 Flask
 Flask-Sockets
