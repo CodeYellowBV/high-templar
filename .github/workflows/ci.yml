@@ -87,7 +87,7 @@ jobs:
       - name: Setup Containers
         run: |
           docker-compose build rabbitmq backend wiremock nginx
-          docker-compose up rabbitmq backend wiremock nginx
+          docker-compose up rabbitmq backend wiremock nginx -d
 
       - name: Run tests with pytest
         run: |
