@@ -65,16 +65,15 @@ jobs:
 
       - name: Install requirements
         run: |
-          python -m pip install --upgrade pip
-          pip install -r ci-requirements.txt
-      #          python -m venv .venv
-      #          .venv/bin/pip install -qr ci-requirements.txt django==${{ matrix.django-version }}
-      #        if: steps.cache-venv.outputs.cache-hit != 'true'
+          python -m venv .venv
+          .venv/bin/pip install -qr ci-requirements.txt django==${{ matrix.django-version }}
+        if: steps.cache-venv.outputs.cache-hit != 'true'
 
       - name: Run linting
-        run: flake8 high_templar
+        run: .venv/bin/flake8 high_templar
 
-#      - name: Prepare postgres database
+
+      #      - name: Prepare postgres database
 #        run: |
 #          psql -c 'CREATE DATABASE "binder-test";' -h localhost -U postgres
 #        if: matrix.database-engine == 'postgres'
@@ -84,8 +83,9 @@ jobs:
 #          mysql --protocol=TCP -h localhost -u root -prootpassword -e 'CREATE DATABASE `binder-test`;'
 #          mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql --protocol=TCP -h localhost -u root -prootpassword mysql
 #        if: matrix.database-engine == 'mysql'
-#      - name: Setup Containers
-#        run: ./run
+
+      - name: Setup Containers
+        run: ./run
 
       - name: Run tests with pytest
         run: |
