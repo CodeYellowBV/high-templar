@@ -1,0 +1,11 @@
+#! /bin/bash
+set -e
+
+export ENV_FILE="$HOME/.env"
+source "$HOME/venv/bin/activate"
+
+cd "$(dirname $(readlink -f $0))/../websocket"
+
+mkdir -p $HOME/run/
+
+exec hypercorn -b "unix:$HOME/run/ws" serve:app

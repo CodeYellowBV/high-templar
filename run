@@ -1,0 +1,12 @@
+#!/bin/sh
+
+SERVICES="rabbitmq backend wiremock nginx"
+
+if [ "$1" = "--no-build" ]
+then
+    echo "Skipping build"
+else
+    docker-compose build --parallel $SERVICES
+fi
+
+docker-compose up "$@" $SERVICES
