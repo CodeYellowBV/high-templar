@@ -87,7 +87,7 @@ jobs:
 
       - name: Run tests with pytest
         run: |
-          pytest
+          .venv/bin/coverage pytest
 #          .venv/bin/coverage run setup.py test
 #        env:
 ##          BINDER_TEST_MYSQL: ${{ matrix.database-engine == 'mysql' && 1 || 0 }}
