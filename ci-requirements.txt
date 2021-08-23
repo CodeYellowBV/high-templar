@@ -11,5 +11,10 @@ frozendict
 gevent
 greenlet
 python-dotenv
+pytest
+pika
 quart
+requests2
+websockets
+wiremock
 wheel
