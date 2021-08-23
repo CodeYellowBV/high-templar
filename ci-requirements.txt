@@ -1,0 +1,7 @@
+codecov
+coverage
+Flask
+Flask-Sockets
+gevent
+greenlet
+python-dotenv
