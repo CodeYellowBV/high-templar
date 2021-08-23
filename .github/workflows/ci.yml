@@ -13,19 +13,19 @@ jobs:
 #        database-engine: ["postgres", "mysql"]
 
     services:
-      rabbitmq:
-        image: rabbitmq:management
-        env:
-          RABBITMQ_DEFAULT_USER: rabbitmq
-          RABBITMQ_DEFAULT_PASS: rabbitmq
-#        options: >-
-#          --health-cmd pg_isready
-#          --health-interval 10s
-#          --health-timeout 5s
-#          --health-retries 5
-        ports:
-          - 5672:5672
-          - 15672:15672
+#      rabbitmq:
+#        image: rabbitmq:management
+#        env:
+#          RABBITMQ_DEFAULT_USER: rabbitmq
+#          RABBITMQ_DEFAULT_PASS: rabbitmq
+##        options: >-
+##          --health-cmd pg_isready
+##          --health-interval 10s
+##          --health-timeout 5s
+##          --health-retries 5
+#        ports:
+#          - 5672:5672
+#          - 15672:15672
 
 #      backend:
 #        image: backend
@@ -34,10 +34,10 @@ jobs:
 #        ports:
 #          - 5000:5000
 
-      wiremock:
-        image: rodolpheche/wiremock
-        ports:
-          - 8080:8080
+#      wiremock:
+#        image: rodolpheche/wiremock
+#        ports:
+#          - 8080:8080
 
 #      nginx:
 #        image: nginx
