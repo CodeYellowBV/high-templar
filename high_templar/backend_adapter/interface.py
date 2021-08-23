@@ -1,6 +1,3 @@
-import json
-from typing import List
-
 from high_templar.authentication import Authentication
 
 
