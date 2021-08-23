@@ -24,8 +24,13 @@ jobs:
 #          --health-timeout 5s
 #          --health-retries 5
         ports:
-          - ${RABBIT_MQ_PORT:-5672}:5672
-          - ${RABBIT_MQ_ADMIN_PORT:-15672}:15672
+          - 5672:5672
+          - 15672:15672
+
+      wiremock:
+        image: rodolpheche/wiremock
+        ports:
+          - 8080:8080
 
     steps:
       - name: Checkout code
