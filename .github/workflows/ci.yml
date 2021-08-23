@@ -75,7 +75,7 @@ jobs:
 
       - name: Run tests
         run: |
-          .venv/bin/coverage run tests/testapp
+          .venv/bin/coverage run --include="high_templar/*" setup.py test
         env:
 #          BINDER_TEST_MYSQL: ${{ matrix.database-engine == 'mysql' && 1 || 0 }}
           CY_RUNNING_INSIDE_CI: 1
