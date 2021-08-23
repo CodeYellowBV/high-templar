@@ -85,11 +85,11 @@ jobs:
 #        if: matrix.database-engine == 'mysql'
 
       - name: Setup Containers
-        run: ./run
+        run: docker-compose --build up rabbitmq backend wiremock nginx
 
       - name: Run tests with pytest
         run: |
-          ./test
+          docker-compose run tester
 #          .venv/bin/coverage run pytest
 #          .venv/bin/coverage run setup.py test
 #        env:
@@ -98,3 +98,7 @@ jobs:
 
       - name: Upload coverage report
         uses: codecov/codecov-action@v1
+
+      - name: Stop containers
+        if: always()
+        run: docker-compose down
