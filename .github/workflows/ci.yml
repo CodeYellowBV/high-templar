@@ -89,7 +89,7 @@ jobs:
 
       - name: Run tests with pytest
         run: |
-          pytest
+          ./test
 #          .venv/bin/coverage run pytest
 #          .venv/bin/coverage run setup.py test
 #        env:
