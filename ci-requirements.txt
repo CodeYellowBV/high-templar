@@ -6,3 +6,4 @@ Flask-Sockets
 gevent
 greenlet
 python-dotenv
+wheel
