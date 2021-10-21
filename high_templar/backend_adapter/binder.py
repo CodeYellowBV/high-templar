@@ -59,5 +59,6 @@ class BinderAdapter(BackendAdapter, ClientSession):
 
     async def _request(self, method, url, *, headers={}, **kwargs):
         url = self.base_url + url
+        kwargs = {**self.app.config.get('REQUEST_KWARGS', {}), **kwargs}
         headers = {**self.headers, **headers}
         return await super()._request(method, url, headers=headers,  **kwargs)
