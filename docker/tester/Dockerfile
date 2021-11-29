@@ -9,8 +9,9 @@ RUN apt-get update -qq && \
 		python3-pip \
 		python3-setuptools \
 		python3-wheel \
+		libffi-dev \
 	> /dev/null && \
-    rm -rf /var/cache/apk/*
+	rm -rf /var/cache/apk/*
 
 # build app
 RUN mkdir code
