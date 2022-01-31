@@ -1,0 +1,15 @@
+[Unit]
+Description=Websocket server
+Requires=some-required-service.service
+After=some-required-service.service
+
+[Service]
+ExecStart=/home/hightemplar/app/sockserv
+User=hightemplar
+WorkingDirectory=/home/hightemplar/
+Restart=always
+UMask=0000
+KillSignal=SIGKILL # TODO: don't use SIGKILL.
+
+[Install]
+WantedBy=multi-user.target hightemplar.service

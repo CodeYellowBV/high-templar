@@ -6,10 +6,15 @@ from setuptools import find_packages, setup
 with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
     README = readme.read()
 
+# allow setup.py to be run from any path
+os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
+
 setup(
     name='high_templar',
     version='2.5.0',
-    packages=find_packages(include=['high_templar', 'high_templar.*']),
+    package_dir={'high_templar': 'high_templar'},
+    packages=find_packages(),
+    include_package_data=True,
     license='MIT',
     description='A python framework for creating a server which handles websockets for an existing API',
     long_description=README,
@@ -31,12 +36,13 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules'
     ],
     install_requires=[
-        'gevent >= 1.1.2, < 1.4.0',
-        'greenlet >= 0.4.12',
-        'Flask >= 0.12.0',
-        'Flask-Sockets >= 0.2.1',
         'python-dotenv >= 0.6.3',
-        'requests >= 2.13.0',
+        'aio-pika==6.4.1',
+        'hypercorn >= 0.9.0',
+        'quart == 0.11.2',
+        'aiohttp >= 3.6.2',
+        'aiohttp_requests>=0.1.2',
+        'frozendict==1.2',
     ],
     test_suite='tests'
 )

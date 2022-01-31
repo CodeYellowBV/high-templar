@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+# from werkzeug.datastructures import Headers
 from werkzeug.http import parse_cookie
 
 
@@ -10,11 +11,12 @@ class NoValue(ValueError):
 class Header(ABC):
 
     @abstractmethod
-    def get_value(self, environ):
+    def get_value(self, websocket):
         """
         Given an environ return either a value for a header or raise a
         NoValue exception if no value could be deduced from the environ.
         """
+        pass
 
     def map(self, func):
         return Map(func, self)
@@ -28,10 +30,12 @@ class Key(Header):
     def __init__(self, key):
         self._key = key
 
-    def get_value(self, environ):
-        if self._key not in environ:
+    def get_value(self, websocket):
+        value = websocket.headers.get(self._key, None)
+
+        if not value:
             raise NoValue
-        return environ[self._key]
+        return value
 
 
 class Param(Header):
@@ -42,11 +46,12 @@ class Param(Header):
     def __init__(self, key):
         self._key = key
 
-    def get_value(self, environ):
-        request = environ.get('werkzeug.request', None)
-        if not request or self._key not in request.args:
-            raise NoValue
-        return request.args[self._key]
+    def get_value(self, websocket):
+        value = websocket.args.get(self._key, None)
+
+        if not value:
+            raise NoValue("value: {} {}".format(self._key, value))
+        return value
 
 
 class Cookie(Header):
@@ -56,9 +61,13 @@ class Cookie(Header):
 
     def __init__(self, key):
         self._key = key
+        self._cookie_key = Key('Cookie')
 
-    def get_value(self, environ):
-        cookie = parse_cookie(environ['HTTP_COOKIE'])
+    def get_value(self, websocket):
+        try:
+            cookie = parse_cookie(self._cookie_key.get_value(websocket))
+        except KeyError:
+            raise NoValue
         if self._key not in cookie:
             raise NoValue
         return cookie[self._key]
@@ -86,13 +95,13 @@ class Map(Header):
         self._args = args
         self._kwargs = kwargs
 
-    def get_value(self, environ):
+    def get_value(self, websocket):
         args = [
-            value.get_value(environ)
+            value.get_value(websocket)
             for value in self._args
         ]
         kwargs = {
-            key: value.get_value(environ)
+            key: value.get_value(websocket)
             for key, value in self._kwargs.items()
         }
         return self._func(*args, **kwargs)
