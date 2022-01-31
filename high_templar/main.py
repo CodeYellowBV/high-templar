@@ -1,7 +1,6 @@
 import asyncio
 
-from quart import Quart, request, make_response, websocket
-import json
+from quart import Quart, websocket
 
 from high_templar.connection import Connection
 from high_templar.backend_adapter import BinderAdapter

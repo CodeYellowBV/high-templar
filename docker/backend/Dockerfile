@@ -2,7 +2,7 @@ FROM debian:10
 
 # install dependencies
 RUN apt-get update -qq && \
-    apt-get install -y git libjpeg-dev libpq-dev gettext python3 python3-pip
+    apt-get install -y git libjpeg-dev libpq-dev gettext python3 python3-pip libffi-dev
 
 
 # build app

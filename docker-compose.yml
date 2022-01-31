@@ -9,6 +9,11 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: rabbitmq
       RABBITMQ_DEFAULT_PASS: rabbitmq
+    healthcheck:
+      test: ['CMD', 'rabbitmq-diagnostics', '-q', 'is_running']
+      interval: 30s
+      timeout: 30s
+      retries: 3
 
   backend:
     build:
@@ -39,3 +44,12 @@ services:
       dockerfile: docker/tester/Dockerfile
     volumes:
       - ./:/code
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      backend:
+        condition: service_started
+      wiremock:
+        condition: service_started
+      nginx:
+        condition: service_started

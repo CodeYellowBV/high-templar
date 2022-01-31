@@ -1,8 +1,6 @@
-import os, logging
+import os
+import logging
 from high_templar.main import create_app
-
-
-import asyncio
 
 
 class Settings:

@@ -3,7 +3,7 @@ from aiohttp import ClientSession
 from .interface import NoBackendConnectionException, BackendAdapter, UnparsableBackendPermissionsException
 from high_templar.authentication import Authentication, Permission
 from . import header
-from werkzeug.datastructures import Headers
+# from werkzeug.datastructures import Headers
 
 DEFAULT_HEADERS = {
     'cookie': header.Key('Cookie'),

@@ -33,7 +33,8 @@ async def handle_message(connection, message: str):
     action = message_content.get('type', None)
 
     if action not in ACTIONS:
-        connection.app.logger.debug("{}: Unsupported action".format(connection.ID, action))
+        # connection.app.logger.debug("{}: Unsupported action".format(connection.ID, action))
+        connection.app.logger.debug("{}: Unsupported action".format(connection.ID))
         return await connection.send({
             'requestId': connection.ID,
             'code': 'error',
