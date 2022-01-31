@@ -36,18 +36,12 @@ jobs:
       - name: Run linting
         run: .venv/bin/flake8 high_templar
 
-      - name: Setup Containers
-        run: |
-          docker-compose build rabbitmq backend wiremock nginx tester
-          docker-compose up -d rabbitmq backend wiremock nginx
-
       - name: Run tests with pytest
-        run: |
-          docker-compose run tester
+        run: docker-compose run --rm tester
 
       - name: Upload coverage report
         uses: codecov/codecov-action@v1
 
       - name: Stop containers
         if: always()
-        run: docker-compose down
+        run: docker-compose stop

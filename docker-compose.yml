@@ -44,3 +44,12 @@ services:
       dockerfile: docker/tester/Dockerfile
     volumes:
       - ./:/code
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      backend:
+        condition: service_started
+      wiremock:
+        condition: service_started
+      nginx:
+        condition: service_started
