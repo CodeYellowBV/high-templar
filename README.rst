@@ -108,6 +108,7 @@ Subscribing to a room
 Request:
 
 .. code:: json
+
     {
         "type": "subscribe",
         "room": {
@@ -120,12 +121,14 @@ Request:
 Response when you have permission:
 
 .. code:: json
+
     { "code": "success" }
 
 
 Response when you don't have permission or the room doesn't exist:
 
 .. code:: json
+
     {
         "code": "error",
         "message": "room-not-found"
@@ -142,6 +145,7 @@ The initial message send from the server contains an `allowed_rooms` key. This `
 
 
 .. code:: json
+
     {
         "is_authenticated": True,
         "allowed_rooms": [{
@@ -163,6 +167,7 @@ The initial message send from the server contains an `allowed_rooms` key. This `
 The key / value pairs have no meaning, other then identifying a room. An exception is the special `*` character, which means that anything will match in place of that character. For the response above, it means the client can connect to the 4 rooms described in `allowed_rooms`, but also to:
 
 .. code:: json
+
     {
         "type": "subscribe",
         "room": {
@@ -173,6 +178,7 @@ The key / value pairs have no meaning, other then identifying a room. An excepti
     }
 
 .. code:: json
+
     {
         "type": "subscribe",
         "room": {
@@ -183,6 +189,7 @@ The key / value pairs have no meaning, other then identifying a room. An excepti
     }
 
 .. code:: json
+
     {
         "type": "subscribe",
         "room": {
@@ -200,6 +207,7 @@ Sending data to a room
 To send data to a room, send a POST request to the server:
 
 .. code:: json
+
     {
         [
             {
@@ -222,6 +230,7 @@ To send data to a room, send a POST request to the server:
 Using the `*`, we can cut 2 rooms. So this is the exactly the same as:
 
 .. code:: json
+
     {
         [
             {

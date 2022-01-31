@@ -11,7 +11,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='high_templar',
-    version='2.5.0',
+    version='3.0.0',
     package_dir={'high_templar': 'high_templar'},
     packages=find_packages(),
     include_package_data=True,
