@@ -20,7 +20,7 @@ class BinderAdapter(BackendAdapter, ClientSession):
     '''
 
     def __init__(self, app):
-        super().__init__()
+        super().__init__(**app.config.get('SESSION_KWARGS', {}))
         self.app = app
         self.base_url = app.config['API_URL']
         self.forward_ip = app.config.get('FORWARD_IP')
