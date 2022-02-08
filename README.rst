@@ -64,9 +64,16 @@ The following options are recognized in ``Settings``:
   * password (string)
   * host (string)
 * SESSION_KWARGS (dict): Specifies keyword arguments that will be 
-  passed along to the constructor of ``ClientSession``.
+  passed along to the constructor of ``ClientSession``. See 
+  https://docs.aiohttp.org/en/stable/client_reference.html for the
+  possible options. For instance, you could use 
+  ``SESSION_KWARGS = {'allow_redirects': False}``.
 * REQUEST_KWARGS (dict): Specifies keyword arguments that will be 
-  passed along to every call to ``ClientSession._request``.
+  passed along to every call to ``ClientSession._request``. See
+  https://docs.aiohttp.org/en/stable/client_reference.html#aiohttp.ClientSession.trace_config
+  for the possible options. For instance, you could use 
+  ``REQUEST_KWARGS = {'ssl': sslcontext}`` (where ``sslcontext`` is a 
+  valid ``SSLContext``).
 
 
 Motivation
