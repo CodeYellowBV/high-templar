@@ -37,6 +37,38 @@ Installation
     # Take a look at `install` folder for examples for systemd.
 
 
+Usage
+========
+Once the installation is complete, you should copy the file ``high_templar/asgi.py`` to your own project and adapt the file to your needs.
+In particular, the ``Settings`` class is interesting to modify.
+The following options are recognized in ``Settings``:
+
+* API_URL (string): The base url to which API requests should be made.
+* USER_ID_PATH (string list): Specifies which keys should be followed to find the 
+  user id from the bootstrap response. This setting defaults to ``['user', 'id']``. 
+* FORWARD_IP (string): Specifies which key from the request environment 
+  should be used to set the ``X-Forwarded-For`` header so that the requests 
+  made appear to come from the original user's IP. By default this setting 
+  defaults to ``None`` which disables automatically filling the 
+  ``X-Forwarded-For`` header altogether.
+* CONNECTION_HEADERS (dict): Specifies custom headers that will be sent 
+  with every request from a connection. This setting accepts a mapping of 
+  header names to ``connection.header.Header`` objects which can 
+  retrieve values from get params, cookies etc.
+* RABBITMQ (dict): Specific options related to rabbitmq. 
+  It has the following suboptions:
+
+  * enabled (boolean)
+  * exchange_name (string)
+  * username (string)
+  * password (string)
+  * host (string)
+* SESSION_KWARGS (dict): Specifies keyword arguments that will be 
+  passed along to the constructor of ``ClientSession``.
+* REQUEST_KWARGS (dict): Specifies keyword arguments that will be 
+  passed along to every call to ``ClientSession._request``.
+
+
 Motivation
 ==============
 
