@@ -40,6 +40,7 @@ class Connection:
         self.app.logger.debug("{} Check if connection is authenticated".format(self.ID))
         try:
             self.authentication = await self.backend_adapter.get_authentication(self.websocket)
+            await self.app.notify_authenticated(self)
             self.app.logger.debug("{} Successfully authenticated. Response: {}".format(self.ID, self.authentication))
 
             # TODO: Send allowed rooms

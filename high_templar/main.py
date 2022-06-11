@@ -23,6 +23,7 @@ class HTQuart(Quart):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.connect_hooks = []
+        self.authenticated_hooks = []
         self.ping_hooks = []
         self.disconnect_hooks = []
 
@@ -48,6 +49,10 @@ class HTQuart(Quart):
         self.connect_hooks.append(func)
         return func
 
+    def on_authenticated(self, func):
+        self.authenticated_hooks.append(func)
+        return func
+
     def on_ping(self, func):
         self.ping_hooks.append(func)
         return func
@@ -60,6 +65,14 @@ class HTQuart(Quart):
         await asyncio.gather(
             *[
                 hook(connection) for hook in self.connect_hooks
+            ]
+        )
+
+    async def notify_authenticated(self, connection):
+        self.logger.debug("notify_authenticated!: {}, {}".format(connection.ID, len(self.authenticated_hooks)))
+        await asyncio.gather(
+            *[
+                hook(connection) for hook in self.authenticated_hooks
             ]
         )
 
