@@ -95,8 +95,9 @@ class Permission(frozendict):
 
 
 class Authentication:
-    def __init__(self, allowed_rooms: List[Permission]):
+    def __init__(self, allowed_rooms: List[Permission], meta_data = {}):
         self.allowed_rooms = set(allowed_rooms)
+        self.meta_data = meta_data
 
     def json_serializable(self):
         return list(map(lambda r: dict(r), self.allowed_rooms))

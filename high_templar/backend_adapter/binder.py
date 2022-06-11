@@ -50,9 +50,10 @@ class BinderAdapter(BackendAdapter, ClientSession):
         self.app.logger.debug("Binder: Proxy bootstrap. Response: {}".format(content))
 
         try:
-            return Authentication(allowed_rooms=list(
-                map(lambda x: Permission(x), content.get('allowed_rooms', []))
-            ))
+            return Authentication(
+                allowed_rooms=list(map(lambda x: Permission(x), content.get('allowed_rooms', []))),
+                meta_data=content,
+            )
         except (AttributeError, ValueError):
             self.app.logger.debug("Binder: could not understand permissions {}".format(content.get('allowed_rooms')))
             raise UnparsableBackendPermissionsException()
