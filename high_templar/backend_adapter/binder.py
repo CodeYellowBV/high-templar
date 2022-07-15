@@ -25,7 +25,8 @@ class BinderAdapter(BackendAdapter, ClientSession):
         self.base_url = app.config['API_URL']
         self.forward_ip = app.config.get('FORWARD_IP')
         self.header_definition = {**DEFAULT_HEADERS, **app.config.get('CONNECTION_HEADERS', {})}
-        self.headers = {}
+        # Failing for version aiohttp 3.8.1
+        # self.headers = {}
 
     async def get_authentication(self, websocket) -> Authentication:
 
