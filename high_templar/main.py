@@ -79,20 +79,23 @@ class HTQuart(Quart):
 
 
 
-def create_app(settings=None):
+def create_app(settings=None, backend_adapter=None):
     app = HTQuart(__name__)
     app.hub = Hub(app)
 
     if settings:
         app.config.from_object(settings)
 
+    BackendAdapter = backend_adapter if backend_adapter is not None else BinderAdapter
+
     @app.websocket('/ws/')
     async def open_socket():
         # Get out of the global context, and get the actual websocket connection, such that we can understand
         # what is going
         ws = websocket._get_current_object()
+
         # For now, just use the binderadapter
-        async with BinderAdapter(app) as adapter:
+        async with BackendAdapter(app) as adapter:
             connection = Connection(adapter, app, ws)
             notify_future = app.notify_connect(connection)
             try:
