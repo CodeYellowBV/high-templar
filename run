@@ -6,7 +6,7 @@ if [ "$1" = "--no-build" ]
 then
     echo "Skipping build"
 else
-    docker-compose build --parallel $SERVICES
+    docker compose build --parallel $SERVICES
 fi
 
-docker-compose up "$@" $SERVICES
+docker compose up "$@" $SERVICES
