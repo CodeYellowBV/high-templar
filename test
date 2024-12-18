@@ -1,4 +1,4 @@
 #!/bin/sh
 set -e
 
-docker-compose run tester "$@"
+docker   compose run tester "$@"
