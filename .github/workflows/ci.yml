@@ -8,26 +8,26 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Run tests with pytest
-        run: docker-compose run --rm tester
+        run: docker compose run --rm tester
 
       - name: Stop containers
         if: always()
-        run: docker-compose stop
+        run: docker compose stop
 
   lint:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Setup python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
-          python-version: 3.7
+          python-version: 3.11
 
       - name: Install requirements
         run: |

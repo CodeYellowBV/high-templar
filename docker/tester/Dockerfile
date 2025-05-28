@@ -1,4 +1,4 @@
-FROM debian:buster-20210408-slim
+FROM debian:bookworm
 
 # install dependencies
 RUN apt-get update -qq && \
@@ -16,11 +16,12 @@ RUN apt-get update -qq && \
 # build app
 RUN mkdir code
 WORKDIR /code
-
 COPY requirements.txt /requirements.txt
 COPY tests/requirements.txt /requirements.tests.txt
-RUN pip3 -q install -Ur /requirements.txt
-RUN pip3 -q install -Ur /requirements.tests.txt
+
+# --break-system-packages to allow pip to install inside of the docker container
+RUN pip3 -q install -Ur /requirements.txt --break-system-packages
+RUN pip3 -q install -Ur /requirements.tests.txt --break-system-packages
 
 # run app
 ENTRYPOINT ["pytest"]

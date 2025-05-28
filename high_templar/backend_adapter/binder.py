@@ -25,7 +25,6 @@ class BinderAdapter(BackendAdapter, ClientSession):
         self.base_url = app.config['API_URL']
         self.forward_ip = app.config.get('FORWARD_IP')
         self.header_definition = {**DEFAULT_HEADERS, **app.config.get('CONNECTION_HEADERS', {})}
-        self.headers = {}
 
     async def get_authentication(self, websocket) -> Authentication:
 

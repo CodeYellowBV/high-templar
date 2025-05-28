@@ -14,13 +14,9 @@ class Permission(frozendict):
     Make a comparable object from permission
     """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.key_set = set(self.keys())
-
     def __lt__(self, other: 'Permission'):
         # If the keys are not the same, we can not compare then
-        if self.key_set != other.key_set:
+        if set(self.keys()) != set(other.keys()):
             return False
 
         has_diff = False

@@ -1,13 +1,14 @@
 sudo: false
 language: python
 python:
-  - "3.5"
-  - "3.6"
+  # support debian 9, 10, 11
   - "3.7"
+  - "3.9"
+  - "3.11"
 cache:
   pip: true
 install:
-  - docker-compose up
+  - docker compose up
   - pip install -Ur tests/requirements.txt
 script:
   - cd tests && pytest
