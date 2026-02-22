@@ -80,6 +80,9 @@ class Permission(frozendict):
     # We hash the dicts so that
     # {'foo': True, 'bar': True} is the same room as {'bar': True, 'foo': True}
     # and so we can still check if a room exists
+    def __hash__(self):
+        return hash(self.hash())
+
     def hash(self):
         unfrozen = {}
 
