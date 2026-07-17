@@ -1,8 +1,6 @@
-version: '3.6'
-
 services:
   rabbitmq:
-    image: rabbitmq:management
+    image: rabbitmq:3.13-management
     ports:
       - ${RABBIT_MQ_PORT:-5672}:5672
       - ${RABBIT_MQ_ADMIN_PORT:-15672}:15672
@@ -31,7 +29,7 @@ services:
       - 8080:8080
 
   nginx:
-    image: nginx
+    image: nginx:1.31
     volumes:
       - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
     ports:
