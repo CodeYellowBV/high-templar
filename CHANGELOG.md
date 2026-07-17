@@ -11,6 +11,15 @@ headers that will be sent with every request from a connection. This setting
 accepts a mapping of header names to `connection.header.Header` objects which
 can retrieve values from get params, cookies etc.
 
+### Fixed
+- The message consumer queue is now declared `exclusive` instead of
+`auto_delete`. RabbitMQ 4 refuses to declare a transient non-exclusive queue,
+which stopped the consumer before it bound to the exchange, so no triggered
+messages were delivered. The queue is private to a single consumer, so
+`exclusive` is the correct declaration and also works on RabbitMQ 3. The test
+suite pins RabbitMQ 3.13, matching the version our projects run, but the
+consumer now works on both 3 and 4.
+
 ## [2.5.0] - 2019-10-02
 ### Added
 - `Hub` objects now have the method `on_ping` that allows you to hook custom

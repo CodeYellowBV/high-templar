@@ -40,8 +40,11 @@ async def run(app):
 
                 app.logger.debug("create queue {}".format(QUEUE_NAME))
 
+                # Exclusive rather than plain auto_delete: the queue is private
+                # to this consumer (its name carries a per-process uuid), and
+                # RabbitMQ 4 refuses to declare a transient non-exclusive queue.
                 queue = await channel.declare_queue(
-                    QUEUE_NAME, auto_delete=True, durable=False
+                    QUEUE_NAME, exclusive=True, durable=False
                 )
                 await queue.bind(exchange=config['exchange_name'], routing_key='*')
 
