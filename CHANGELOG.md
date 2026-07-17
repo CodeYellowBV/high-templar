@@ -10,6 +10,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 headers that will be sent with every request from a connection. This setting
 accepts a mapping of header names to `connection.header.Header` objects which
 can retrieve values from get params, cookies etc.
+- The `X-Real-IP` header of the connection is now forwarded to the backend by
+default. Without it the backend attributes every request to the host High
+Templar dials it from, rather than to the client that opened the websocket.
+- An `API_SOCKET` setting was added that makes requests to the backend go over
+the given unix socket rather than over TCP. This is for deployments where the
+backend is otherwise only reachable back through a proxy, which overwrites
+`X-Real-IP` with the address of the machine dialling it. `API_URL` is still
+required, and must be an `http://` url: the socket does not speak TLS, the path
+prefix is still prepended to every request, and the host, while it no longer
+decides where the connection goes, is still sent as the `Host` header and so
+must be one the backend accepts.
+
+### Removed
+- The `FORWARD_IP` setting has been removed. It read the value of the given key
+from the WSGI request environment and sent it on as `X-Forwarded-For`. The
+request environment has not existed since the rewrite to Quart, which dropped
+the code that read the setting but left the setting itself in place, so it has
+had no effect since. `X-Real-IP` is now forwarded by default instead; note that
+this is a different header, chosen because a proxy overwrites it rather than
+appending to it, and so it cannot be set by the client.
 
 ### Fixed
 - The message consumer queue is now declared `exclusive` instead of

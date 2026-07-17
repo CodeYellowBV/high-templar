@@ -5,8 +5,8 @@ from high_templar.main import create_app
 
 class Settings:
     API_URL = os.environ.get('CY_BINDER_INTERNAL', 'http://wiremock:8080/api/')
+    API_SOCKET = os.environ.get('CY_BINDER_SOCKET')
     USER_ID_PATH = ['user', 'data', 'id']
-    FORWARD_IP = 'HTTP_X_REAL_IP'
     CONNECTION_HEADERS = {
         # 'X-Session-Token': header.Param('session_token'),
     }
