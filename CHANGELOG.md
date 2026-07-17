@@ -5,11 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+
+## [3.1.0] - 2026-07-17
+
 ### Added
-- A `CONNECTION_HEADERS` setting was added that allows you to specify custom
-headers that will be sent with every request from a connection. This setting
-accepts a mapping of header names to `connection.header.Header` objects which
-can retrieve values from get params, cookies etc.
+
 - The `X-Real-IP` header of the connection is now forwarded to the backend by
 default. Without it the backend attributes every request to the host High
 Templar dials it from, rather than to the client that opened the websocket.
@@ -21,17 +22,28 @@ required, and must be an `http://` url: the socket does not speak TLS, the path
 prefix is still prepended to every request, and the host, while it no longer
 decides where the connection goes, is still sent as the `Host` header and so
 must be one the backend accepts.
+- `create_app` accepts a custom `backend_adapter`, so the backend integration is
+no longer hardwired to Binder.
+- `Permission` objects are now hashable.
+- Support for running on Debian 12 (bookworm); the test suite also covers
+Debian 9–11.
+
+### Changed
+
+- Relaxed dependency version constraints, and updated packaging and CI.
 
 ### Removed
+
 - The `FORWARD_IP` setting has been removed. It read the value of the given key
 from the WSGI request environment and sent it on as `X-Forwarded-For`. The
-request environment has not existed since the rewrite to Quart, which dropped
-the code that read the setting but left the setting itself in place, so it has
-had no effect since. `X-Real-IP` is now forwarded by default instead; note that
-this is a different header, chosen because a proxy overwrites it rather than
-appending to it, and so it cannot be set by the client.
+request environment has not existed since the Quart rewrite in 3.0.0, which
+dropped the code that read the setting but left the setting itself in place, so
+it has had no effect since. `X-Real-IP` is now forwarded by default instead;
+note that this is a different header, chosen because a proxy overwrites it
+rather than appending to it, and so it cannot be set by the client.
 
 ### Fixed
+
 - The message consumer queue is now declared `exclusive` instead of
 `auto_delete`. RabbitMQ 4 refuses to declare a transient non-exclusive queue,
 which stopped the consumer before it bound to the exchange, so no triggered
@@ -40,40 +52,79 @@ messages were delivered. The queue is private to a single consumer, so
 suite pins RabbitMQ 3.13, matching the version our projects run, but the
 consumer now works on both 3 and 4.
 
-## [2.5.0] - 2019-10-02
+
+## [3.0.0] - 2022-01-31
+
 ### Added
+
+- A `CONNECTION_HEADERS` setting was added that allows you to specify custom
+headers that will be sent with every request from a connection. This setting
+accepts a mapping of header names to `connection.header.Header` objects which
+can retrieve values from get params, cookies etc.
+- A `REQUEST_KWARGS` setting to pass extra keyword arguments to every request
+made to the backend.
+
+### Changed
+
+- Rebuilt on Quart/ASGI (previously gevent/WSGI); trigger messages are now
+delivered over RabbitMQ.
+- The `Host` header is no longer forwarded to the backend, as it could confuse
+routing in nginx.
+
+
+## [2.5.0] - 2019-10-02
+
+### Added
+
 - `Hub` objects now have the method `on_ping` that allows you to hook custom
 behavior for when a connection receives a ping message from the client. This
 hook will receive the connection as only argument.
 
+
 ## [2.4.2] - 2019-09-30
+
 ### Fixed
+
 - Readded accidentally deleted functionality (`connection.api`,
 `hub.on_connect`, `hub.on_disconnect`)
 
+
 ## [2.4.1] - 2019-09-27
+
 ### Fixed
+
 - Fix one slow connection slowing down the entire system.
 
+
 ## [2.4.0] - 2019-09-26
+
 ### Fixed
+
 - Make `pong` messages send as raw text again instead of JSON.
 - Do not double JSON encode messages.
 - Do not crash on dead websocket connection.
 
+
 ## [2.3.0] - 2019-09-24
+
 ### Added
+
 - A `FORWARD_IP` setting was added that allows you to specify which key from
 the request environment should be used to set the `X-Forwarded-For` header so
 that the requests made appear to come from the original user's IP. By default
 this setting defaults to `None` which disables automatically filling the
 `X-Forwarded-For` header altogether.
+
 ### Fixed
+
 - A lock was added per connection for writing to the socket to fix an issue
 where concurrent writes would cause issues.
 
+
 ## [2.2.0] - 2019-04-09
+
 ### Added
+
 - `Connection` objects now have an `api` attribute that can be used as an
 easy way to interface with the connected Binder API. This handles things like
 cookies, CSRF, and Auth tokens for you.
@@ -85,10 +136,14 @@ should be followed to find the user id from the bootstrap response. This
 setting defaults to `['user', 'id']` which is compatible with how it used to
 work.
 
+
 ## [2.1.2] - 2018-09-14
+
 No changelog was kept up until this version.
 
-[Unreleased]: https://github.com/CodeYellowBV/high-templar/compare/2.5.0...HEAD
+[Unreleased]: https://github.com/CodeYellowBV/high-templar/compare/3.1.0...HEAD
+[3.1.0]: https://github.com/CodeYellowBV/high-templar/compare/3.0.0...3.1.0
+[3.0.0]: https://github.com/CodeYellowBV/high-templar/compare/2.5.0...3.0.0
 [2.5.0]: https://github.com/CodeYellowBV/high-templar/compare/2.4.2...2.5.0
 [2.4.2]: https://github.com/CodeYellowBV/high-templar/compare/2.4.1...2.4.2
 [2.4.1]: https://github.com/CodeYellowBV/high-templar/compare/2.4.0...2.4.1
