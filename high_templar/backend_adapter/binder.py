@@ -1,5 +1,5 @@
 # from aiohttp_requests import requests
-from aiohttp import ClientSession
+from aiohttp import ClientSession, UnixConnector
 from .interface import NoBackendConnectionException, BackendAdapter, UnparsableBackendPermissionsException
 from high_templar.authentication import Authentication, Permission
 from . import header
@@ -8,6 +8,9 @@ from . import header
 DEFAULT_HEADERS = {
     'cookie': header.Key('Cookie'),
     'user-agent': header.Key('User-Agent'),
+    # Without this the backend attributes the connection to whichever host we
+    # dial it from, rather than to the client that opened the websocket.
+    'x-real-ip': header.Key('X-Real-IP'),
     'x-csrftoken': header.Cookie('csrftoken'),
     'authorization': header.Param('token').map('Token {}'.format),
 }
@@ -20,10 +23,15 @@ class BinderAdapter(BackendAdapter, ClientSession):
     '''
 
     def __init__(self, app):
-        super().__init__()
+        # API_SOCKET reaches the backend over a unix socket, so the request does
+        # not pass back through the proxy that fronts API_URL. API_URL is still
+        # prepended to every request and must be http:// -- the socket does not
+        # speak TLS -- and its host, though no longer dialled, is still sent as
+        # the Host header.
+        socket = app.config.get('API_SOCKET')
+        super().__init__(connector=UnixConnector(path=socket) if socket else None)
         self.app = app
         self.base_url = app.config['API_URL']
-        self.forward_ip = app.config.get('FORWARD_IP')
         self.header_definition = {**DEFAULT_HEADERS, **app.config.get('CONNECTION_HEADERS', {})}
 
     async def get_authentication(self, websocket) -> Authentication:

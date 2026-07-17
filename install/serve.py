@@ -19,9 +19,11 @@ logging.basicConfig(
 
 
 class Settings:
-    API_URL = os.environ.get('BINDER_INTERNAL', app_url)
+    API_SOCKET = os.environ.get('BINDER_SOCKET')
+    API_URL = os.environ.get('BINDER_INTERNAL') or (
+        'http://localhost/api/' if API_SOCKET else app_url
+    )
     USER_ID_PATH = ['user', 'data', 'id']
-    FORWARD_IP = 'HTTP_X_REAL_IP'
     CONNECTION_HEADERS = {
         'X-Session-Token': header.Param('session_token'),
         'Referer': header.Fixed(app_url), # Needed in production for online/offline notification (see T25664)
